@@ -18,89 +18,92 @@ const selecao = (await getCollection('colunas'))
     readTime: entry.data.readTime,
   }));
 
-const maisLidas = [
-  { title: 'Onde erramos? O texto que funda o Rio Mundo', meta: 'Ideias & Debates' },
-  { title: 'A esquerda depois do PT — o que sobrou?', meta: 'Podcast EP 01' },
-  { title: 'O Rio que o cartão-postal esconde', meta: 'Entrevista em vídeo' },
-];
+const [destaque, ...restante] = selecao;
 
-const podcasts = [
-  {
-    n: 'EP 01',
-    title: 'A esquerda depois do PT — o que sobrou?',
-    desc: 'Debate inaugural: declínio petista, crise de representação e novos rumos. Com participação de ouvintes do X.',
-    dur: '42 min',
-    file: '#',
-  },
-  {
-    n: 'EP 02',
-    title: 'Rio: quem manda na cidade?',
-    desc: 'Milícias, orçamento público e a vida real em Nova Friburgo e na capital. Reportagem + análise.',
-    dur: '35 min',
-    file: '#',
-  },
-];
-
-const videos = [
-  {
-    genero: 'Vídeo',
-    title: 'Entrevista: para onde vai o pensamento à esquerda?',
-    meta: 'Estreia em breve • YouTube',
-    id: null as string | null,
-  },
-  {
-    genero: 'Vídeo',
-    title: 'Entrevista: o Rio que o cartão-postal esconde',
-    meta: 'Estreia em breve • YouTube',
-    id: null as string | null,
-  },
-];
-
-const emContinuo = [
-  { hora: '09h12', texto: 'Onde erramos? O debate que funda o Rio Mundo', link: '#selecao' },
-  { hora: '08h40', texto: 'EP 01 do podcast entra em produção: a esquerda depois do PT', link: '#podcasts' },
-  { hora: 'Ontem', texto: 'Nova entrevista em vídeo: o Rio que o cartão-postal esconde', link: '#entrevistas' },
-  { hora: '13 out', texto: 'Post fixado no X: siga e participe da conversa', link: 'https://x.com/rionomundo' },
-];
+// "Em voga" e "Últimas atualizações" derivam dos artigos reais — sem posts falsos.
+const emVoga = selecao.slice(0, 3);
+const ultimas = selecao.slice(0, 4);
 ---
 
 <Base>
+  <h1 class="sr-only">Rio Mundo — Notícias sobre o Rio e o mundo pela ótica de uma esquerda não identitária</h1>
+
   <!-- A SELEÇÃO -->
-  <section id="selecao" class="mx-auto max-w-6xl px-6 py-12">
+  <section id="selecao" aria-labelledby="titulo-selecao" class="mx-auto max-w-6xl scroll-mt-24 px-6 py-10 md:py-12">
     <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
-      <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Nossa opinião</h2>
-      <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
-      <a href="#" class="shrink-0 text-sm font-bold uppercase tracking-widest text-verde-700 hover:underline">Ver arquivo →</a>
+      <h2 id="titulo-selecao" class="font-display shrink-0 text-3xl font-semibold tracking-tight md:text-4xl">Nossa opinião</h2>
+      <span class="hidden h-px flex-1 bg-verde-950/15 md:block" aria-hidden="true"></span>
+      <span class="hidden shrink-0 text-xs font-bold uppercase tracking-widest text-verde-950/55 sm:block">{selecao.length} texto{selecao.length === 1 ? '' : 's'}</span>
     </div>
+
+    {destaque && (
+      destaque.imagem ? (
+        <article class="group mt-8 grid gap-8 border-b border-verde-950/10 pb-10 md:grid-cols-2 md:items-center">
+          <a href={destaque.href} class="block overflow-hidden border border-verde-950/15 bg-white" tabindex="-1" aria-hidden="true">
+            <img src={destaque.imagem} alt="" loading="eager" decoding="async" class="aspect-[16/9] w-full object-cover" />
+          </a>
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{destaque.genero}</p>
+            <h3 class="font-display mt-2 text-4xl font-semibold leading-[1.02] tracking-tight md:text-5xl">
+              <a href={destaque.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{destaque.title}</a>
+            </h3>
+            <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-verde-950/65">{destaque.excerpt}</p>
+            <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/60">
+              <span class="font-bold uppercase tracking-widest text-verde-950/70">{destaque.editoria}</span>
+              <span class="mx-1" aria-hidden="true">•</span> {destaque.author} <span class="mx-1" aria-hidden="true">•</span> {destaque.date} <span class="mx-1" aria-hidden="true">•</span> {destaque.readTime}
+            </p>
+          </div>
+        </article>
+      ) : (
+        <article class="group mt-8 max-w-3xl border-b border-verde-950/10 pb-10">
+          <p class="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">
+            <span class="inline-block h-px w-8 bg-verde-900" aria-hidden="true"></span>
+            {destaque.genero} — Destaque
+          </p>
+          <h3 class="font-display mt-3 text-4xl font-semibold leading-[1.02] tracking-tight text-verde-950 md:text-[3.25rem]">
+            <a href={destaque.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{destaque.title}</a>
+          </h3>
+          <p class="mt-4 max-w-2xl text-base leading-relaxed text-verde-950/65 md:text-lg">{destaque.excerpt}</p>
+          <p class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-verde-950/10 pt-4 text-xs text-verde-950/60">
+            <span class="font-bold uppercase tracking-widest text-verde-950/70">{destaque.editoria}</span>
+            <span aria-hidden="true">•</span> <span>{destaque.author}</span>
+            <span aria-hidden="true">•</span> <span>{destaque.date}</span>
+            <span aria-hidden="true">•</span> <span>{destaque.readTime}</span>
+            <a href={destaque.href} class="ml-auto hidden text-xs font-bold uppercase tracking-widest text-verde-900 underline underline-offset-4 hover:text-verde-800 sm:inline">Ler artigo →</a>
+          </p>
+        </article>
+      )
+    )}
+
     <div class="mt-8 grid gap-x-8 gap-y-10 md:grid-cols-3">
-      {selecao.map((c) => (
+      {restante.map((c) => (
         <article class="group flex flex-col border-t-2 border-verde-950/80 pt-4">
-          {c.imagem && (<img src={c.imagem} alt="" loading="lazy" class="mb-4 aspect-[16/10] w-full border border-verde-950/15 object-cover" />)}
-          <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{c.genero}</p>
-          <h3 class="font-display mt-2 text-2xl font-semibold leading-tight"><a href={c.href} class="group-hover:underline group-hover:decoration-verde-700 group-hover:underline-offset-4">{c.title}</a></h3>
-          <p class="mt-3 flex-1 text-sm leading-relaxed text-verde-950/65">{c.excerpt}</p>
-          <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/55">
+          {c.imagem && (<img src={c.imagem} alt={c.title} loading="lazy" decoding="async" class="mb-4 aspect-[16/10] w-full border border-verde-950/15 object-cover" />)}
+          <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{c.genero}</p>
+          <h3 class="font-display mt-2 text-2xl font-semibold leading-tight"><a href={c.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{c.title}</a></h3>
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-verde-950/75">{c.excerpt}</p>
+          <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/60">
             <span class="font-bold uppercase tracking-widest text-verde-950/70">{c.editoria}</span>
-            <span class="mx-1">•</span> {c.author} <span class="mx-1">•</span> {c.date} <span class="mx-1">•</span> {c.readTime}
+            <span class="mx-1" aria-hidden="true">•</span> {c.author} <span class="mx-1" aria-hidden="true">•</span> {c.date} <span class="mx-1" aria-hidden="true">•</span> {c.readTime}
           </p>
         </article>
       ))}
     </div>
   </section>
 
-  <!-- MAIS LIDAS -->
-  <section id="mais-lidas" class="border-y border-verde-950/15 bg-marfim-50">
+  <!-- MAIS LIDAS — deriva dos artigos reais -->
+  <section id="mais-lidas" aria-labelledby="titulo-voga" class="scroll-mt-24 border-y border-verde-950/15 bg-white">
     <div class="mx-auto max-w-6xl px-6 py-12">
       <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
-        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Em voga</h2>
+        <h2 id="titulo-voga" class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Em voga</h2>
       </div>
       <ol class="mt-2 grid gap-8 md:grid-cols-3">
-        {maisLidas.map((o, i) => (
+        {emVoga.map((o, i) => (
           <li class="flex gap-5 border-b border-verde-950/10 py-6 md:border-b-0">
-            <span class="font-display text-6xl font-semibold leading-none text-verde-700">{i + 1}</span>
+            <span class="font-display text-6xl font-semibold leading-none text-verde-800" aria-hidden="true">{i + 1}</span>
             <div>
-              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{o.meta}</p>
-              <h3 class="font-display mt-2 text-xl font-semibold leading-snug hover:underline hover:decoration-verde-700 hover:underline-offset-4">{o.title}</h3>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{o.editoria}</p>
+              <h3 class="font-display mt-2 text-xl font-semibold leading-snug"><a href={o.href} class="hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{o.title}</a></h3>
             </div>
           </li>
         ))}
@@ -108,108 +111,87 @@ const emContinuo = [
     </div>
   </section>
 
-  <!-- PODCASTS -->
-  <section id="podcasts" class="mx-auto max-w-6xl px-6 py-12">
+  <!-- PODCASTS — filler honesto até o EP 01 -->
+  <section id="podcasts" aria-labelledby="titulo-podcasts" class="mx-auto max-w-6xl scroll-mt-24 px-6 py-12">
     <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
-      <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Podcasts</h2>
-      <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
-      <span class="shrink-0 text-xs font-bold uppercase tracking-[0.2em] text-verde-950/55">Ouça offline • MP3 para baixar</span>
+      <h2 id="titulo-podcasts" class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Podcasts</h2>
+      <span class="hidden h-px flex-1 bg-verde-950/15 md:block" aria-hidden="true"></span>
+      <span class="shrink-0 rounded-full border border-verde-900/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">Em breve</span>
     </div>
-    <div class="mt-8 grid gap-8 md:grid-cols-2">
-      {podcasts.map((p) => (
-        <article class="border border-verde-950/15 bg-marfim-50 p-7">
-          <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em]">
-            <span class="text-verde-700">Podcast • {p.n}</span>
-            <span class="text-verde-950/55">{p.dur} • MP3</span>
-          </div>
-          <h3 class="font-display mt-3 text-2xl font-semibold leading-tight">{p.title}</h3>
-          <p class="mt-2 text-sm leading-relaxed text-verde-950/65">{p.desc}</p>
-          <audio controls preload="none" class="mt-5 w-full">
-            <source src={p.file} type="audio/mpeg" />
-            Seu navegador não suporta áudio.
-          </audio>
-          <div class="mt-4 flex flex-wrap items-center gap-4 border-t border-verde-950/10 pt-4">
-            <a href={p.file} download class="bg-verde-950 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-marfim-100 hover:bg-verde-900">⬇ Baixar MP3</a>
-            <span class="text-xs text-verde-950/55">Publique em <code class="bg-verde-950/5 px-1.5 py-0.5">public/audio/</code> e troque o campo <code class="bg-verde-950/5 px-1.5 py-0.5">file</code></span>
-          </div>
-        </article>
-      ))}
-    </div>
+    <article class="mt-8 grid gap-8 border border-dashed border-verde-950/25 bg-white p-8 md:grid-cols-[auto_1fr_auto] md:items-center md:p-10">
+      <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-verde-950 text-marfim-100" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-7 w-7"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke-linecap="round" /></svg>
+      </span>
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">Podcast • gravando</p>
+        <h3 class="font-display mt-2 text-2xl font-semibold leading-tight md:text-3xl">O primeiro episódio já está saindo do forno</h3>
+        <p class="mt-2 max-w-xl text-sm leading-relaxed text-verde-950/65">Assim que ficar pronto, aparece aqui para ouvir e baixar. Por enquanto, a conversa segue no X.</p>
+      </div>
+      <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="inline-block min-h-[44px] shrink-0 bg-verde-950 px-6 py-3 text-xs font-bold uppercase tracking-widest text-marfim-100 hover:bg-verde-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde-900">Acompanhar no X →</a>
+    </article>
   </section>
 
-  <!-- VÍDEOS -->
-  <section id="entrevistas" class="border-y border-verde-950/15 bg-marfim-50">
+  <!-- ENTREVISTAS — filler honesto até a primeira conversa -->
+  <section id="entrevistas" aria-labelledby="titulo-entrevistas" class="scroll-mt-24 border-y border-verde-950/15 bg-white">
     <div class="mx-auto max-w-6xl px-6 py-12">
       <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
-        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Entrevistas</h2>
-        <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
-        <span class="shrink-0 text-xs font-bold uppercase tracking-[0.2em] text-verde-950/55">Conversas longas</span>
+        <h2 id="titulo-entrevistas" class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Entrevistas</h2>
+        <span class="hidden h-px flex-1 bg-verde-950/15 md:block" aria-hidden="true"></span>
+        <span class="shrink-0 rounded-full border border-verde-900/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">Em breve</span>
       </div>
-      <div class="mt-8 grid gap-8 md:grid-cols-2">
-        {videos.map((v) => (
-          <article class="border border-verde-950/15 bg-marfim-100">
-            <div class="grid aspect-video place-items-center bg-verde-950 text-marfim-100">
-              {v.id ? (
-                <iframe
-                  class="h-full w-full"
-                  src={`https://www.youtube.com/embed/${v.id}`}
-                  title={v.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                />
-              ) : (
-                <div class="px-8 text-center">
-                  <p class="font-display text-5xl text-verde-300">▶</p>
-                  <p class="mt-3 text-xs font-bold uppercase tracking-[0.2em] text-marfim-200/70">Cole o ID do YouTube no código para publicar</p>
-                </div>
-              )}
-            </div>
-            <div class="border-t-2 border-verde-950/80 p-6">
-              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{v.genero}</p>
-              <h3 class="font-display mt-2 text-xl font-semibold leading-snug">{v.title}</h3>
-              <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-verde-950/55">{v.meta}</p>
-            </div>
-          </article>
-        ))}
-      </div>
+      <article class="mt-8 grid gap-0 overflow-hidden border border-dashed border-verde-950/25 bg-marfim-100 md:grid-cols-2">
+        <div class="grid min-h-[220px] place-items-center bg-verde-950 p-10 text-center text-marfim-100">
+          <div>
+            <span class="mx-auto grid h-14 w-14 place-items-center rounded-full border border-white/25" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+            <p class="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-verde-300">Conversas longas</p>
+            <p class="font-display mt-2 text-xl font-semibold">A primeira ainda está no forno</p>
+          </div>
+        </div>
+        <div class="flex flex-col justify-center p-8 md:p-10">
+          <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">Vídeo • YouTube</p>
+          <h3 class="font-display mt-2 text-2xl font-semibold leading-tight">Boa conversa leva tempo</h3>
+          <p class="mt-2 text-sm leading-relaxed text-verde-950/65">Estamos marcando e gravando. Quando sair, avisamos no X.</p>
+          <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mt-5 inline-block self-start text-xs font-bold uppercase tracking-widest text-verde-900 underline underline-offset-4 hover:text-verde-800 focus-visible:outline-2 focus-visible:outline-verde-900">Ver no X →</a>
+        </div>
+      </article>
     </div>
   </section>
 
   <!-- EM CONTÍNUO + NEWSLETTER -->
-  <section id="em-continuo" class="mx-auto max-w-6xl px-6 py-12">
+  <section id="em-continuo" aria-labelledby="titulo-continuo" class="mx-auto max-w-6xl scroll-mt-24 px-6 py-12">
     <div class="grid gap-12 md:grid-cols-[1fr_1fr]">
       <div>
         <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
-          <h2 class="font-display text-3xl font-semibold tracking-tight">Últimas atualizações</h2>
+          <h2 id="titulo-continuo" class="font-display text-3xl font-semibold tracking-tight">Últimas atualizações</h2>
         </div>
         <ul class="mt-2">
-          {emContinuo.map((e) => (
+          {ultimas.map((e) => (
             <li class="flex gap-4 border-b border-verde-950/10 py-4">
-              <span class="flex flex-col items-center">
-                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-verde-700"></span>
+              <span class="flex flex-col items-center" aria-hidden="true">
+                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-verde-800"></span>
                 <span class="w-px flex-1 bg-verde-950/10"></span>
               </span>
               <div>
-                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{e.hora}</p>
-                <a href={e.link} class="font-display mt-1 block text-lg font-medium leading-snug hover:underline hover:decoration-verde-700 hover:underline-offset-4">{e.texto}</a>
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{e.date}</p>
+                <a href={e.href} class="font-display mt-1 block text-lg font-medium leading-snug hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{e.title}</a>
               </div>
             </li>
           ))}
         </ul>
-        <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mt-5 inline-block text-sm font-bold uppercase tracking-widest text-verde-700 underline underline-offset-4 hover:text-verde-800">
+        <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mt-5 inline-block text-sm font-bold uppercase tracking-widest text-verde-900 underline underline-offset-4 hover:text-verde-800 focus-visible:outline-2 focus-visible:outline-verde-900">
           Toda a atualidade no X →
         </a>
       </div>
 
-      <div id="newsletter" class="flex flex-col justify-center bg-verde-950 p-10 text-center text-marfim-100">
+      <div id="newsletter" class="flex flex-col justify-center bg-verde-950 p-6 text-center text-marfim-100 sm:p-10">
         <p class="text-xs font-bold uppercase tracking-[0.25em] text-verde-300">Newsletter</p>
-        <h2 class="font-display mt-3 text-3xl font-semibold leading-tight md:text-4xl">O essencial do Rio Mundo, de segunda a sexta às 8h</h2>
-        <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-marfim-200/75">Cada dia, os textos do Rio Mundo que você não pode perder. Direto do Rio para o mundo.</p>
-        <form class="mx-auto mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row" onsubmit="return false">
-          <input required type="email" placeholder="seu@email.com" class="flex-1 border border-white/20 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-marfim-200/50 outline-none focus:border-verde-300" />
-          <button class="bg-marfim-100 px-6 py-3 text-xs font-bold uppercase tracking-widest text-verde-950 hover:bg-white">Assinar</button>
-        </form>
-        <p class="mt-4 text-[11px] text-marfim-200/55">Zero spam. Cancele quando quiser.</p>
+        <p class="mx-auto mt-3 inline-block rounded-full border border-white/25 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-marfim-100">Em breve</p>
+        <h2 class="font-display mt-3 text-3xl font-semibold leading-tight md:text-4xl">O essencial no seu e-mail</h2>
+        <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-marfim-200/75">Ainda estamos montando. Por enquanto, lê por aqui e acompanha no X.</p>
+        <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mx-auto mt-6 inline-block min-h-[44px] bg-marfim-100 px-6 py-3 text-xs font-bold uppercase tracking-widest text-verde-950 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Acompanhar no X →</a>
+        <p class="mt-4 text-[11px] text-marfim-200/55">Sem pressa, sem spam.</p>
       </div>
     </div>
   </section>

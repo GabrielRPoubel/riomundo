@@ -66,7 +66,7 @@
 </head>
 <body>
 <header>
-  <img src="public/logo-branca.png" alt="Rio Mundo" />
+  <img src="public/logo-polido.png" alt="Rio Mundo" style="height: 40px; width: auto; filter: brightness(0) invert(1);" />
   <div>
     <h1>Editor Rio Mundo</h1>
     <p>Escrever → formatar → publicar em “Nossa opinião”</p>
@@ -280,12 +280,17 @@ function escHtml(s) {
 function escAttr(s) {
   return escHtml(s).replace(/"/g, '&quot;');
 }
+function urlSegura(u) {
+  const v = (u || '').trim();
+  if (/^(\/|https?:\/\/)/i.test(v)) return v;
+  return '#';
+}
 function inline(s) {
   return escHtml(s)
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" />')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt, src) => '<img src="' + escAttr(urlSegura(src)) + '" alt="' + alt + '" loading="lazy" />')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[(.+?)\]\((.+?)\)/g, (m, txt, href) => '<a href="' + escAttr(urlSegura(href)) + '" rel="noreferrer">' + txt + '</a>');
 }
 function mdParaHtml(md) {
   const lines = md.split('\n');
@@ -296,7 +301,8 @@ function mdParaHtml(md) {
     const fig = t.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (fig) {
       closeList();
-      html += '<figure><img src="' + escAttr(fig[2]) + '" alt="' + escAttr(fig[1]) + '" loading="lazy" />' +
+      const src = urlSegura(fig[2]);
+      html += '<figure><img src="' + escAttr(src) + '" alt="' + escAttr(fig[1]) + '" loading="lazy" />' +
         (fig[1] ? '<figcaption>' + escHtml(fig[1]) + '</figcaption>' : '') + '</figure>';
     }
     else if (t.startsWith('# ')) { closeList(); html += '<h2>' + inline(t.slice(2)) + '</h2>'; }

@@ -17,7 +17,7 @@ Ref: https://x.com/rionomundo
 
 ## Publicar podcast
 1. Coloque o MP3 em `public/audio/ep01.mp3`
-2. Em `src/pages/index.astro`, troque `file: '#'` por `file: '/audio/ep01.mp3'`
+2. Em `src/data/site.ts`, troque `file: null` por `file: '/audio/ep01.mp3'`
 
 ## Publicar artigo/coluna (editor)
 1. Abra `editor.html` no navegador (duplo clique)
@@ -29,12 +29,15 @@ Ref: https://x.com/rionomundo
 - Legenda: escreva na linha abaixo da imagem em *itálico*
 
 ## Publicar vídeo
-Em `src/pages/index.astro`, troque `id: null` pelo ID do YouTube.
+Em `src/data/site.ts`, troque `id: null` pelo ID do YouTube.
+
+## Dados centralizados
+`src/data/site.ts` é a fonte única para `maisLidas, podcasts, videos, emContinuo, ticker, editorias` — usado por `Base.astro` e `index.astro`.
 
 ## Visualizar antes do commit
 Duplo clique em `visualizar.bat` → abre http://localhost:4321 com o build final.
 
 ## Visual
-- Marfim: #FAF6ED / #FDFBF6
-- Verde: #1A3C34 / #2D5A4C
-- Fontes: Fraunces (títulos) + Inter (texto)
+- Marfim: #FAF6ED / #FDFBF6 / #F1E9D7
+- Verde: #052E16 / #065F2C / #007A33 (texto pequeno usa 900 para contraste AA)
+- Fontes: Libre Franklin (títulos) + Inter (texto)

@@ -10,7 +10,8 @@
     "visualizar": "astro build && astro preview --port 4321 --open"
   },
   "dependencies": {
-    "astro": "^5.13.0"
+    "astro": "^5.13.0",
+    "@astrojs/sitemap": "^3.2.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
