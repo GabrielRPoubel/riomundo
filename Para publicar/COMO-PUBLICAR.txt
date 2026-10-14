@@ -1,0 +1,21 @@
+RIO MUNDO — como publicar (3 passos)
+
+1. TEXTOS: salve o .md do editor em:
+   Para publicar\Textos\
+   (no editor.html, botão "Publicar no site")
+
+2. IMAGENS: solte as fotos e capas em:
+   Para publicar\Imagens\
+   (.png ou .jpg — use o mesmo nome citado no campo "capa" do texto)
+
+3. AUDIOS: solte os episódios em:
+   Para publicar\Audios\
+   (.mp3 — depois me avise para ligar o player)
+
+Depois: duplo clique em publicar.bat (pasta principal do projeto).
+
+O publicar.bat move os arquivos para o lugar certo, IGNORA os
+repetidos sem alteração, confere se o site monta (build) e envia
+tudo ao GitHub. Se nada mudou, ele avisa e não faz nada.
+
+Quer só olhar antes? Duplo clique em visualizar.bat.

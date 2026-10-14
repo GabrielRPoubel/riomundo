@@ -1,0 +1,7 @@
+Solte aqui as fotos e capas (.png ou .jpg).
+
+No texto, a capa é citada com o MESMO nome, assim:
+  /imagens/nome-do-arquivo.png
+
+Depois: duplo clique em publicar.bat (pasta principal).
+Arquivos repetidos sem alteração são ignorados.

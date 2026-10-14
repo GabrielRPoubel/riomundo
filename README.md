@@ -15,24 +15,33 @@ Ref: https://x.com/rionomundo
 & "C:\Program Files\nodejs\npm.cmd" run dev
 ```
 
+## Publicar tudo (fluxo simples)
+1. Salve `.md` em `Para publicar\Textos\`, imagens em `Para publicar\Imagens\`, `.mp3` em `Para publicar\Audios\`
+   (cada pasta tem um guia `.txt`)
+2. Duplo clique em `publicar.bat` — ele move só o que é novo, **ignora arquivos
+   repetidos sem alteração**, confere o build, commita e envia ao GitHub.
+   Se nada mudou, ele avisa e não faz nada.
+
 ## Publicar podcast
-1. Coloque o MP3 em `public/audio/ep01.mp3`
-2. Em `src/data/site.ts`, troque `file: null` por `file: '/audio/ep01.mp3'`
+1. Solte o MP3 em `Para publicar\Audios\` e rode `publicar.bat`
+2. Em `src/data/site.ts`, ligue o player (troque `file: null` por `file: '/audio/ep01.mp3'`)
+   e rode `publicar.bat` de novo
 
 ## Publicar artigo/coluna (editor)
 1. Abra `editor.html` no navegador (duplo clique)
 2. Preencha título, gênero, editoria, resumo e escreva o texto (botões N/I/Título/Citação/Lista/Link)
-3. Clique **Publicar no site** e salve o `.md` em `src/content/colunas/`
+3. Clique **Publicar no site** e salve o `.md` em `Para publicar\Textos\`
    (se o navegador não permitir salvar direto, use **Baixar .md** e mova o arquivo)
-4. Rode `visualizar.bat` — o card entra em “Nossa opinião” e a página `/coluna/<slug>` é criada
-- Imagens: botão **Imagem** (URL ou upload para `public/imagens/`); campo **capa** para thumbnail do card
+4. Rode `publicar.bat` — o card entra em “Nossa opinião” e a página `/coluna/<slug>` é criada
+- Imagens: botão **Imagem** (URL ou solte o arquivo em `Para publicar\Imagens/`); campo **capa** para thumbnail do card (`/imagens/nome-do-arquivo`)
 - Legenda: escreva na linha abaixo da imagem em *itálico*
 
 ## Publicar vídeo
 Em `src/data/site.ts`, troque `id: null` pelo ID do YouTube.
 
 ## Dados centralizados
-`src/data/site.ts` é a fonte única para `maisLidas, podcasts, videos, emContinuo, ticker, editorias` — usado por `Base.astro` e `index.astro`.
+`src/data/site.ts` é a fonte única para `editorias, ticker` — usado por `Base.astro` e `index.astro`.
+(“Em voga” e “Últimas atualizações” derivam dos artigos reais em `src/content/colunas/`.)
 
 ## Visualizar antes do commit
 Duplo clique em `visualizar.bat` → abre http://localhost:4321 com o build final.

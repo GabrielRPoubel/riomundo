@@ -76,9 +76,9 @@
 <main>
   <p class="hint"><strong>Como publicar:</strong> 1) preencha os campos e escreva o texto;
   2) clique <strong>Publicar no site</strong> e salve o arquivo dentro da pasta
-  <code>src/content/colunas</code>; 3) rode o <code>visualizar.bat</code> para gerar
-  o site com o artigo novo (card na homepage + página do artigo). Imagens vão
-  para <code>public/imagens</code>; escreva a legenda na linha de baixo em
+  <code>Para publicar\Textos</code>; 3) rode o <code>publicar.bat</code> (pasta principal)
+  para gerar o site com o artigo novo (card na homepage + página do artigo).
+  Imagens vão para <code>Para publicar\Imagens</code>; escreva a legenda na linha de baixo em
   <em>itálico</em>.</p>
 
   <div class="grid">
@@ -212,7 +212,7 @@ async function salvarNaPasta(arquivo, pastaAlvo) {
     const w = await handle.createWritable();
     await w.write(buf);
     await w.close();
-    status('Imagem salva. Grave dentro de public/' + pastaAlvo + ' para publicar junto.', 'ok');
+    status('Imagem salva. Grave dentro de Para publicar\\Imagens para publicar junto.', 'ok');
   } catch (err) {
     if (err && err.name === 'AbortError') return null;
     const a = document.createElement('a');
@@ -220,7 +220,7 @@ async function salvarNaPasta(arquivo, pastaAlvo) {
     a.download = nome;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    status('Imagem baixada. Mova para public/' + pastaAlvo + ' para publicar junto.', 'ok');
+    status('Imagem baixada. Mova para Para publicar\\Imagens para publicar junto.', 'ok');
   }
   return destino;
 }
@@ -388,10 +388,10 @@ $('publicar').addEventListener('click', async () => {
     const w = await handle.createWritable();
     await w.write(md);
     await w.close();
-    status('Publicado! Agora rode o visualizar.bat para ver o artigo no site.', 'ok');
+    status('Publicado! Agora rode o publicar.bat (pasta principal) para ver o artigo no ar.', 'ok');
   } catch (err) {
     if (err && err.name === 'AbortError') return;
-    status('Este navegador não permite salvar direto na pasta. Use “Baixar .md” e mova o arquivo para src/content/colunas.', 'err');
+    status('Este navegador não permite salvar direto na pasta. Use “Baixar .md” e mova o arquivo para Para publicar\\Textos.', 'err');
   }
 });
 $('baixar').addEventListener('click', () => {
@@ -402,7 +402,7 @@ $('baixar').addEventListener('click', () => {
   a.download = slug + '.md';
   a.click();
   URL.revokeObjectURL(a.href);
-  status('Arquivo baixado. Mova para src/content/colunas e rode o visualizar.bat.', 'ok');
+  status('Arquivo baixado. Mova para Para publicar\\Textos e rode o publicar.bat (pasta principal).', 'ok');
 });
 $('limpar').addEventListener('click', () => {
   if (!confirm('Apagar tudo e recomeçar?')) return;

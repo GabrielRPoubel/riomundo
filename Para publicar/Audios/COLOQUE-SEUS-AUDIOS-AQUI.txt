@@ -1,0 +1,6 @@
+Solte aqui os episódios (.mp3).
+
+Depois: duplo clique em publicar.bat (pasta principal)
+e me avise para ligar o player do episódio novo.
+
+Arquivos repetidos sem alteração são ignorados.
