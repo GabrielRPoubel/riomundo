@@ -29,7 +29,13 @@ set IGUAIS=0
 
 echo === Recolhendo arquivos de Para publicar ===
 call :Sincronizar "%IN_TXT%" "%OUT_TXT%" "*.md"
-call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.png *.jpg *.jpeg *.webp *.gif *.avif *.svg"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.png"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.jpg"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.jpeg"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.webp"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.gif"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.avif"
+call :Sincronizar "%IN_IMG%" "%OUT_IMG%" "*.svg"
 call :Sincronizar "%IN_AUD%" "%OUT_AUD%" "*.mp3"
 echo.
 echo Novos/atualizados: !NOVOS! - Sem alteracao: !IGUAIS!
@@ -102,31 +108,29 @@ echo ERRO - Falhou o envio. As alteracoes ficaram salvas aqui. Rode de novo.
 pause
 exit /b 1
 
-REM Move arquivos novos ou alterados e ignora os identicos.
+REM Move arquivos novos ou alterados de UMA extensao e ignora os identicos.
 :Sincronizar
 set "O=%~1"
 set "DT=%~2"
-for %%M in (%~3) do (
-  if exist "!O!\%%M" (
-    for %%F in ("!O!\%%M") do (
-      set "NOME=%%~nxF"
-      if not exist "!DT!\!NOME!" (
+if exist "!O!\%~3" (
+  for %%F in ("!O!\%~3") do (
+    set "NOME=%%~nxF"
+    if not exist "!DT!\!NOME!" (
+      copy /y "%%~fF" "!DT!\!NOME!" >nul
+      del "%%~fF"
+      set /a NOVOS+=1
+      echo NOVO - !NOME!
+    ) else (
+      fc /b "%%~fF" "!DT!\!NOME!" >nul
+      if errorlevel 1 (
         copy /y "%%~fF" "!DT!\!NOME!" >nul
         del "%%~fF"
         set /a NOVOS+=1
-        echo NOVO - !NOME!
+        echo ATUALIZADO - !NOME!
       ) else (
-        fc /b "%%~fF" "!DT!\!NOME!" >nul
-        if errorlevel 1 (
-          copy /y "%%~fF" "!DT!\!NOME!" >nul
-          del "%%~fF"
-          set /a NOVOS+=1
-          echo ATUALIZADO - !NOME!
-        ) else (
-          del "%%~fF"
-          set /a IGUAIS+=1
-          echo IGUAL - !NOME! - ignorado
-        )
+        del "%%~fF"
+        set /a IGUAIS+=1
+        echo IGUAL - !NOME! - ignorado
       )
     )
   )
