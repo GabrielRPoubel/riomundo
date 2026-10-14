@@ -50,7 +50,7 @@ const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} 
     </p>
     {entry.data.imagem && (
       <figure class="mt-6">
-        <img src={entry.data.imagem} alt="" class="aspect-video w-full border border-verde-950/15 object-cover" />
+        <img src={url(entry.data.imagem)} alt="" class="aspect-video w-full border border-verde-950/15 object-cover" />
       </figure>
     )}
     <div class="prose-jornal mt-8">
