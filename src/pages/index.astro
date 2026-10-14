@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
-import { tempoLeitura, formatarData, visivel } from '../data/site';
+import { tempoLeitura, formatarData, visivel, url } from '../data/site';
 
 // Cards de "Nossa opinião" vêm dos arquivos src/content/colunas/*.md
 // (criados pelo editor.html). Os mais recentes aparecem primeiro.
@@ -10,7 +10,7 @@ const selecao = (await getCollection('colunas'))
   .filter(visivel)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .map((entry) => ({
-    href: `/coluna/${entry.slug}`,
+    href: url(`coluna/${entry.slug}`),
     imagem: entry.data.imagem,
     genero: entry.data.genero,
     title: entry.data.title,

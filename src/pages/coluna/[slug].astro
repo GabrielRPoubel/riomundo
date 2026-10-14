@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { tempoLeitura, formatarData, visivel, SITE_URL } from '../../data/site';
+import { tempoLeitura, formatarData, visivel, url, SITE_URL } from '../../data/site';
 
 export async function getStaticPaths() {
   const colunas = (await getCollection('colunas')).filter(visivel);
@@ -30,7 +30,7 @@ const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} 
 
 <Base title={`${entry.data.title} — Rio Mundo`} description={entry.data.excerpt} image={entry.data.imagem ?? '/logo-polido.png'} type="article" pubDate={entry.data.pubDate.toISOString()}>
   <article class="mx-auto max-w-[65ch] scroll-mt-24 px-6 pb-16 pt-10 md:pt-14">
-    <a href="/#selecao" class="text-xs font-bold uppercase tracking-[0.2em] text-verde-900 hover:underline focus-visible:outline-2 focus-visible:outline-verde-900">← Voltar</a>
+    <a href={url('#selecao')} class="text-xs font-bold uppercase tracking-[0.2em] text-verde-900 hover:underline focus-visible:outline-2 focus-visible:outline-verde-900">← Voltar</a>
     <p class="mt-6 text-xs font-bold uppercase tracking-[0.25em] text-verde-900">
       {entry.data.genero}
     </p>
@@ -63,7 +63,7 @@ const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} 
           {leiaTambem.map((r) => (
             <li class="border-t border-verde-950/15 pt-3">
               <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{r.data.genero}</p>
-              <a href={`/coluna/${r.slug}`} class="font-display mt-1 block text-lg font-semibold leading-snug hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{r.data.title}</a>
+              <a href={url(`coluna/${r.slug}`)} class="font-display mt-1 block text-lg font-semibold leading-snug hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{r.data.title}</a>
             </li>
           ))}
         </ul>

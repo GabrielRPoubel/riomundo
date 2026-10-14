@@ -6,12 +6,18 @@ import suspensos from './suspensos.json';
 
 export const SITE_URL = 'https://rionomundo.com.br';
 
+const base = import.meta.env.BASE_URL; // '/' local e no domínio; '/riomundo/' no Pages
+// Prefixa caminhos com a base do deploy — vale na raiz e no subcaminho.
+export function url(caminho: string): string {
+  return base + caminho.replace(/^\//, '');
+}
+
 export const editorias: Array<[string, string]> = [
-  ['Nossa opinião', '/#selecao'],
-  ['Podcasts', '/#podcasts'],
-  ['Entrevistas', '/#entrevistas'],
-  ['Em voga', '/#mais-lidas'],
-  ['Últimas atualizações', '/#em-continuo'],
+  ['Nossa opinião', url('#selecao')],
+  ['Podcasts', url('#podcasts')],
+  ['Entrevistas', url('#entrevistas')],
+  ['Em voga', url('#mais-lidas')],
+  ['Últimas atualizações', url('#em-continuo')],
 ];
 
 // (O ticker do topo agora deriva dos artigos em Base.astro — sem texto fixo.)
