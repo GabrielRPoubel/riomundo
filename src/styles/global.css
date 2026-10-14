@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-marfim-50: #FDFBF6;
+  --color-marfim-100: #FAF6ED;
+  --color-marfim-200: #F1E9D7;
+  --color-marfim-300: #E3D5B8;
+  --color-verde-950: #052E16;
+  --color-verde-900: #065F2C;
+  --color-verde-800: #007A33;
+  --color-verde-700: #009C3B;
+  --color-verde-500: #34B45E;
+  --color-verde-300: #8FDCA6;
+  --color-verde-100: #DCF2E3;
+  --font-display: "Libre Franklin", "Inter", system-ui, sans-serif;
+  --font-sans-body: "Inter", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-marfim-100);
+  color: var(--color-verde-950);
+  font-family: var(--font-sans-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Esconde a barra de rolagem mantendo a rolagem por arrasto/toque */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

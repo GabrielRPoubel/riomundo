@@ -1,0 +1,101 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const colunas = await getCollection('colunas');
+  return colunas.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const data = entry.data.pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+---
+
+<Base title={`${entry.data.title} — Rio Mundo`} description={entry.data.excerpt}>
+  <article class="mx-auto max-w-3xl px-6 pb-16 pt-10 md:pt-14">
+    <a href="/#selecao" class="text-xs font-bold uppercase tracking-[0.2em] text-verde-700 hover:underline">← Voltar para Nossa opinião</a>
+    <p class="mt-6 text-xs font-bold uppercase tracking-[0.25em] text-verde-700">
+      {entry.data.genero} <span class="mx-1 text-verde-950/30">—</span> <span class="text-verde-950/55">{entry.data.editoria}</span>
+    </p>
+    <h1 class="font-display mt-4 text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">{entry.data.title}</h1>
+    <p class="mt-4 border-b-2 border-verde-950 pb-5 text-lg leading-relaxed text-verde-950/70">{entry.data.excerpt}</p>
+    <p class="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-verde-950/55">
+      Por {entry.data.author} <span class="mx-1">•</span> {data} <span class="mx-1">•</span> {entry.data.readTime} de leitura
+    </p>
+    {entry.data.imagem && (
+      <figure class="mt-6">
+        <img src={entry.data.imagem} alt={entry.data.title} class="w-full border border-verde-950/15 object-cover" />
+      </figure>
+    )}
+    <div class="prose-jornal mt-8">
+      <Content />
+    </div>
+    <div class="mt-10 border-t border-verde-950/15 pt-6">
+      <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="text-sm font-bold uppercase tracking-widest text-verde-700 underline underline-offset-4 hover:text-verde-800">
+        Comente no @rionomundo →
+      </a>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .prose-jornal :global(h2) {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    letter-spacing: -0.01em;
+  }
+  .prose-jornal :global(h3) {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 1.75rem 0 0.5rem;
+  }
+  .prose-jornal :global(p) {
+    margin: 1rem 0;
+    line-height: 1.8;
+    color: rgb(5 46 22 / 0.85);
+  }
+  .prose-jornal :global(ul) {
+    margin: 1rem 0;
+    padding-left: 1.25rem;
+    list-style: disc;
+    line-height: 1.8;
+  }
+  .prose-jornal :global(ol) {
+    margin: 1rem 0;
+    padding-left: 1.25rem;
+    list-style: decimal;
+    line-height: 1.8;
+  }
+  .prose-jornal :global(blockquote) {
+    margin: 1.5rem 0;
+    border-left: 3px solid var(--color-verde-700);
+    padding-left: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-style: italic;
+  }
+  .prose-jornal :global(a) {
+    color: var(--color-verde-700);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-jornal :global(hr) {
+    margin: 2rem 0;
+    border-color: rgb(5 46 22 / 0.15);
+  }
+  .prose-jornal :global(img) {
+    width: 100%;
+    border: 1px solid rgb(5 46 22 / 0.15);
+    margin: 1.5rem 0 0;
+  }
+  .prose-jornal :global(p:has(img)) {
+    line-height: 0;
+  }
+</style>

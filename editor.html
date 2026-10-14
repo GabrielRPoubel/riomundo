@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Editor Rio Mundo — escrever e publicar</title>
+<style>
+  :root {
+    --marfim: #FAF6ED; --marfim2: #FDFBF6; --verde-950: #052E16;
+    --verde-900: #065F2C; --verde-700: #009C3B; --verde-100: #DCF2E3;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--marfim); color: var(--verde-950);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--verde-950); color: var(--marfim);
+    padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  header img { height: 40px; }
+  header h1 { font-size: 18px; margin: 0; font-family: Georgia, serif; }
+  header p { margin: 0; font-size: 12px; opacity: .7; }
+  main { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--marfim2); border: 1px solid rgb(5 46 22 / .15);
+    border-top: 3px solid var(--verde-950); padding: 18px; }
+  .card h2 { font-family: Georgia, serif; margin: 0 0 12px; font-size: 20px; }
+  label { display: block; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .12em; margin: 12px 0 4px; }
+  input, select, textarea { width: 100%; padding: 9px 11px; font-size: 14px;
+    border: 1px solid rgb(5 46 22 / .25); background: #fff; color: inherit; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--verde-700); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 6px; }
+  .toolbar button { border: 1px solid rgb(5 46 22 / .25); background: #fff;
+    padding: 6px 10px; font-size: 13px; cursor: pointer; }
+  .toolbar button:hover { background: var(--verde-100); }
+  .tempo-auto { padding: 9px 11px; font-size: 14px;
+    border: 1px dashed rgb(5 46 22 / .35); background: var(--verde-100); }
+  #corpo { min-height: 320px; font-family: ui-monospace, Consolas, monospace;
+    line-height: 1.6; }
+  #preview { min-height: 320px; }
+  #preview h2 { font-family: Georgia, serif; }
+  #preview blockquote { border-left: 3px solid var(--verde-700);
+    margin: 12px 0; padding-left: 12px; font-style: italic;
+    font-family: Georgia, serif; font-size: 18px; }
+  #preview ul, #preview ol { padding-left: 22px; line-height: 1.7; }
+  #preview p { line-height: 1.75; }
+  #preview a { color: var(--verde-700); }
+  #preview img { max-width: 100%; border: 1px solid rgb(5 46 22 / .2); }
+  #preview figure { margin: 12px 0; }
+  #preview figcaption { font-size: 12px; opacity: .65; margin-top: 4px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .btn { border: 0; padding: 12px 22px; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em; cursor: pointer; }
+  .btn-pub { background: var(--verde-950); color: var(--marfim); }
+  .btn-pub:hover { background: var(--verde-900); }
+  .btn-sec { background: transparent; border: 1px solid rgb(5 46 22 / .3); }
+  #status { margin-top: 12px; font-size: 14px; }
+  #status.ok { color: var(--verde-900); font-weight: 700; }
+  #status.err { color: #b00020; font-weight: 700; }
+  details { margin-top: 14px; }
+  summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+  pre { background: var(--verde-950); color: #d8f3e2; padding: 14px;
+    overflow-x: auto; font-size: 12px; }
+  .hint { font-size: 13px; opacity: .75; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <img src="public/logo-branca.png" alt="Rio Mundo" />
+  <div>
+    <h1>Editor Rio Mundo</h1>
+    <p>Escrever → formatar → publicar em “Nossa opinião”</p>
+  </div>
+</header>
+
+<main>
+  <p class="hint"><strong>Como publicar:</strong> 1) preencha os campos e escreva o texto;
+  2) clique <strong>Publicar no site</strong> e salve o arquivo dentro da pasta
+  <code>src/content/colunas</code>; 3) rode o <code>visualizar.bat</code> para gerar
+  o site com o artigo novo (card na homepage + página do artigo). Imagens vão
+  para <code>public/imagens</code>; escreva a legenda na linha de baixo em
+  <em>itálico</em>.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1. Dados do artigo</h2>
+      <label for="titulo">Título</label>
+      <input id="titulo" placeholder="Ex: Onde erramos?" />
+      <div class="row">
+        <div>
+          <label for="slug">Nome do arquivo (slug)</label>
+          <input id="slug" placeholder="onde-erramos" />
+        </div>
+        <div>
+          <label for="data">Data</label>
+          <input id="data" type="date" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="genero">Gênero</label>
+          <select id="genero">
+            <option>Notícia</option><option>Opinião</option>
+            <option>Extras</option>
+          </select>
+        </div>
+        <div>
+          <label for="editoria">Editoria</label>
+          <select id="editoria">
+            <option>Rio</option><option>Brasil</option><option>Mundo</option>
+            <option>Ideias &amp; Debates</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="autor">Autor</label>
+          <input id="autor" value="Redação Rio Mundo" />
+        </div>
+        <div>
+          <label>Tempo de leitura (automático)</label>
+          <div id="tempo" class="tempo-auto">≈ 1 min</div>
+        </div>
+      </div>
+      <label for="resumo">Resumo (aparece no card da homepage)</label>
+      <input id="resumo" placeholder="Uma ou duas frases que resumem o texto" />
+      <label for="capa">Imagem de capa (opcional — aparece no card e no topo do artigo)</label>
+      <div class="row" style="grid-template-columns: 1fr auto; align-items: end;">
+        <input id="capa" placeholder="/imagens/foto.png ou https://…" />
+        <button class="btn btn-sec" id="enviar-capa" type="button">Enviar arquivo…</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Prévia</h2>
+      <div id="preview"><p style="opacity:.5">A prévia do texto aparece aqui…</p></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>3. Texto (formatação simples)</h2>
+    <div class="toolbar">
+      <button data-fmt="bold" title="Negrito"><strong>N</strong></button>
+      <button data-fmt="italic" title="Itálico"><em>I</em></button>
+      <button data-fmt="h2" title="Título de seção">Título</button>
+      <button data-fmt="h3" title="Subtítulo">Subtítulo</button>
+      <button data-fmt="quote" title="Citação">“ ”</button>
+      <button data-fmt="ul" title="Lista">• Lista</button>
+      <button data-fmt="ol" title="Lista numerada">1. Lista</button>
+      <button data-fmt="link" title="Link">Link</button>
+      <button data-fmt="hr" title="Linha divisória">— Linha</button>
+      <button data-fmt="img" title="Inserir imagem">Imagem</button>
+    </div>
+    <textarea id="corpo" placeholder="Escreva aqui. Use os botões acima para formatar."></textarea>
+    <div class="actions">
+      <button class="btn btn-pub" id="publicar">Publicar no site</button>
+      <button class="btn btn-sec" id="baixar">Baixar .md</button>
+      <button class="btn btn-sec" id="limpar">Limpar</button>
+    </div>
+    <p id="status"></p>
+    <details>
+      <summary>Ver arquivo .md gerado</summary>
+      <pre id="raw"></pre>
+    </details>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const corpo = $('corpo');
+
+$('data').valueAsDate = new Date();
+
+function slugify(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+$('titulo').addEventListener('input', (e) => {
+  if (!slugTouched) $('slug').value = slugify(e.target.value).slice(0, 60);
+});
+let slugTouched = false;
+$('slug').addEventListener('input', () => { slugTouched = true; });
+
+function wrap(before, after, placeholder) {
+  const s = corpo.selectionStart, e = corpo.selectionEnd;
+  const sel = corpo.value.slice(s, e) || placeholder;
+  corpo.value = corpo.value.slice(0, s) + before + sel + after + corpo.value.slice(e);
+  corpo.focus();
+  corpo.selectionStart = s + before.length;
+  corpo.selectionEnd = s + before.length + sel.length;
+  atualizar();
+}
+function linePrefix(prefix, placeholder) {
+  const s = corpo.selectionStart;
+  const lineStart = corpo.value.lastIndexOf('\n', s - 1) + 1;
+  const sel = corpo.value.slice(corpo.selectionStart, corpo.selectionEnd) || placeholder;
+  corpo.value = corpo.value.slice(0, lineStart) + prefix + sel + corpo.value.slice(corpo.selectionEnd);
+  corpo.focus();
+  atualizar();
+}
+async function salvarNaPasta(arquivo, pastaAlvo) {
+  const ext = (arquivo.name.match(/\.[a-z0-9]+$/i) || ['.png'])[0].toLowerCase();
+  const nome = slugify(arquivo.name.replace(/\.[a-z0-9]+$/i, '')).slice(0, 50) + ext;
+  const destino = '/' + pastaAlvo + '/' + nome;
+  try {
+    if (!window.showSaveFilePicker) throw new Error('no-fs-api');
+    const handle = await window.showSaveFilePicker({
+      suggestedName: nome,
+      types: [{ description: 'Imagem', accept: { 'image/*': [ext] } }],
+    });
+    const buf = await arquivo.arrayBuffer();
+    const w = await handle.createWritable();
+    await w.write(buf);
+    await w.close();
+    status('Imagem salva. Grave dentro de public/' + pastaAlvo + ' para publicar junto.', 'ok');
+  } catch (err) {
+    if (err && err.name === 'AbortError') return null;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(arquivo);
+    a.download = nome;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    status('Imagem baixada. Mova para public/' + pastaAlvo + ' para publicar junto.', 'ok');
+  }
+  return destino;
+}
+function escolherArquivoImagem() {
+  return new Promise((resolve) => {
+    const pick = document.createElement('input');
+    pick.type = 'file';
+    pick.accept = 'image/*';
+    pick.onchange = () => resolve(pick.files[0] || null);
+    pick.click();
+  });
+}
+async function inserirImagem(btn) {
+  btn.disabled = true;
+  try {
+    const url = prompt('Cole a URL da imagem — ou deixe vazio para enviar um arquivo do computador:');
+    if (url === null) return;
+    let src, legenda;
+    if (url.trim()) {
+      src = url.trim();
+      legenda = prompt('Legenda da imagem (opcional):') || '';
+    } else {
+      const arquivo = await escolherArquivoImagem();
+      if (!arquivo) return;
+      legenda = prompt('Legenda da imagem (opcional):') || '';
+      src = await salvarNaPasta(arquivo, 'imagens');
+      if (!src) return;
+    }
+    const md = '\n\n![' + legenda.replace(/[\[\]]/g, '') + '](' + src + ')\n\n';
+    const s = corpo.selectionStart;
+    corpo.value = corpo.value.slice(0, s) + md + corpo.value.slice(corpo.selectionEnd);
+    corpo.focus();
+    atualizar();
+  } finally {
+    btn.disabled = false;
+  }
+}
+document.querySelectorAll('.toolbar button').forEach((b) => {
+  b.addEventListener('click', () => {
+    const f = b.dataset.fmt;
+    if (f === 'bold') wrap('**', '**', 'destaque');
+    else if (f === 'italic') wrap('*', '*', 'ênfase');
+    else if (f === 'h2') linePrefix('## ', 'Título da seção');
+    else if (f === 'h3') linePrefix('### ', 'Subtítulo');
+    else if (f === 'quote') linePrefix('> ', 'Citação marcante');
+    else if (f === 'ul') linePrefix('- ', 'Item da lista');
+    else if (f === 'ol') linePrefix('1. ', 'Item numerado');
+    else if (f === 'link') wrap('[', '](https://)', 'texto do link');
+    else if (f === 'hr') wrap('\n\n---\n\n', '', '');
+    else if (f === 'img') inserirImagem(b);
+  });
+});
+
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escAttr(s) {
+  return escHtml(s).replace(/"/g, '&quot;');
+}
+function inline(s) {
+  return escHtml(s)
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" />')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+}
+function mdParaHtml(md) {
+  const lines = md.split('\n');
+  let html = '', list = null;
+  const closeList = () => { if (list) { html += list === 'ul' ? '</ul>' : '</ol>'; list = null; } };
+  for (const line of lines) {
+    const t = line.trim();
+    const fig = t.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (fig) {
+      closeList();
+      html += '<figure><img src="' + escAttr(fig[2]) + '" alt="' + escAttr(fig[1]) + '" loading="lazy" />' +
+        (fig[1] ? '<figcaption>' + escHtml(fig[1]) + '</figcaption>' : '') + '</figure>';
+    }
+    else if (t.startsWith('# ')) { closeList(); html += '<h2>' + inline(t.slice(2)) + '</h2>'; }
+    else if (t.startsWith('## ')) { closeList(); html += '<h2>' + inline(t.slice(3)) + '</h2>'; }
+    else if (t.startsWith('### ')) { closeList(); html += '<h3>' + inline(t.slice(4)) + '</h3>'; }
+    else if (t.startsWith('> ')) { closeList(); html += '<blockquote>' + inline(t.slice(2)) + '</blockquote>'; }
+    else if (/^(-|\*) /.test(t)) {
+      if (list !== 'ul') { closeList(); html += '<ul>'; list = 'ul'; }
+      html += '<li>' + inline(t.slice(2)) + '</li>';
+    }
+    else if (/^\d+\. /.test(t)) {
+      if (list !== 'ol') { closeList(); html += '<ol>'; list = 'ol'; }
+      html += '<li>' + inline(t.replace(/^\d+\. /, '')) + '</li>';
+    }
+    else if (t === '---') { closeList(); html += '<hr />'; }
+    else if (t === '') { closeList(); }
+    else { closeList(); html += '<p>' + inline(t) + '</p>'; }
+  }
+  closeList();
+  return html;
+}
+
+function escYaml(s) {  if (/[:#\[\]{}&*!|>'"%@`,?]|^\s|\s$|\n/.test(s)) return '"' + s.replace(/"/g, '\\"') + '"';
+  return s;
+}
+// Estimativa de leitura: ~900 letras por minuto, mínimo de 1 min.
+function calcularTempo() {
+  const letras = (corpo.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || []).length;
+  const min = Math.max(1, Math.round(letras / 900));
+  return { texto: min + ' min', detalhe: letras.toLocaleString('pt-BR') + ' letras' };
+}
+function gerarMd() {
+  const titulo = $('titulo').value.trim();
+  const slug = $('slug').value.trim() || slugify(titulo) || 'novo-artigo';
+  const linhas = ['---',
+    'title: ' + escYaml(titulo),
+    'excerpt: ' + escYaml($('resumo').value.trim()),
+    'genero: ' + escYaml($('genero').value),
+    'editoria: ' + escYaml($('editoria').value),
+    'author: ' + escYaml($('autor').value.trim() || 'Redação Rio Mundo'),
+    'pubDate: ' + ($('data').value || new Date().toISOString().slice(0, 10)),
+    'readTime: ' + escYaml(calcularTempo().texto)];
+  const capa = $('capa').value.trim();
+  if (capa) linhas.push('imagem: ' + escYaml(capa));
+  linhas.push('---', '', corpo.value.trim() + '\n');
+  return { slug, md: linhas.join('\n') };
+}
+function atualizar() {
+  const titulo = $('titulo').value.trim();
+  const tmp = calcularTempo();
+  $('tempo').textContent = '≈ ' + tmp.texto + ' · ' + tmp.detalhe;
+  const { md } = gerarMd();
+  $('raw').textContent = md;
+  const titleHtml = titulo
+    ? '<h2 style="font-family:Georgia,serif">' + escHtml(titulo) + '</h2>' : '';
+  $('preview').innerHTML = titleHtml + mdParaHtml(corpo.value) ||
+    '<p style="opacity:.5">A prévia do texto aparece aqui…</p>';
+}
+['titulo', 'resumo', 'autor', 'data', 'genero', 'editoria'].forEach((id) => {
+  $(id).addEventListener('input', atualizar);
+});
+corpo.addEventListener('input', atualizar);
+
+function status(msg, cls) {
+  const el = $('status');
+  el.textContent = msg;
+  el.className = cls || '';
+}
+function validar() {
+  if (!$('titulo').value.trim()) { status('Dê um título ao artigo antes de publicar.', 'err'); return false; }
+  if (!corpo.value.trim()) { status('Escreva o texto do artigo antes de publicar.', 'err'); return false; }
+  return true;
+}
+$('publicar').addEventListener('click', async () => {
+  if (!validar()) return;
+  const { slug, md } = gerarMd();
+  try {
+    if (!window.showSaveFilePicker) throw new Error('no-fs-api');
+    const handle = await window.showSaveFilePicker({
+      suggestedName: slug + '.md',
+      types: [{ description: 'Artigo Markdown', accept: { 'text/markdown': ['.md'] } }],
+    });
+    const w = await handle.createWritable();
+    await w.write(md);
+    await w.close();
+    status('Publicado! Agora rode o visualizar.bat para ver o artigo no site.', 'ok');
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    status('Este navegador não permite salvar direto na pasta. Use “Baixar .md” e mova o arquivo para src/content/colunas.', 'err');
+  }
+});
+$('baixar').addEventListener('click', () => {
+  if (!validar()) return;
+  const { slug, md } = gerarMd();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+  a.download = slug + '.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  status('Arquivo baixado. Mova para src/content/colunas e rode o visualizar.bat.', 'ok');
+});
+$('limpar').addEventListener('click', () => {
+  if (!confirm('Apagar tudo e recomeçar?')) return;
+  ['titulo', 'slug', 'resumo', 'capa', 'corpo'].forEach((id) => { $(id).value = ''; });
+  slugTouched = false;
+  atualizar();
+  status('');
+});
+$('enviar-capa').addEventListener('click', async () => {
+  const arquivo = await escolherArquivoImagem();
+  if (!arquivo) return;
+  const destino = await salvarNaPasta(arquivo, 'imagens');
+  if (destino) $('capa').value = destino;
+  atualizar();
+});
+atualizar();
+</script>
+</body>
+</html>

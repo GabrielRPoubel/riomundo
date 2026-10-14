@@ -1,0 +1,216 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+// Cards de "Nossa opinião" vêm dos arquivos src/content/colunas/*.md
+// (criados pelo editor.html). Os mais recentes aparecem primeiro.
+const selecao = (await getCollection('colunas'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((entry) => ({
+    href: `/coluna/${entry.slug}`,
+    imagem: entry.data.imagem,
+    genero: entry.data.genero,
+    title: entry.data.title,
+    excerpt: entry.data.excerpt,
+    editoria: entry.data.editoria,
+    author: entry.data.author,
+    date: entry.data.pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+    readTime: entry.data.readTime,
+  }));
+
+const maisLidas = [
+  { title: 'Onde erramos? O texto que funda o Rio Mundo', meta: 'Ideias & Debates' },
+  { title: 'A esquerda depois do PT — o que sobrou?', meta: 'Podcast EP 01' },
+  { title: 'O Rio que o cartão-postal esconde', meta: 'Entrevista em vídeo' },
+];
+
+const podcasts = [
+  {
+    n: 'EP 01',
+    title: 'A esquerda depois do PT — o que sobrou?',
+    desc: 'Debate inaugural: declínio petista, crise de representação e novos rumos. Com participação de ouvintes do X.',
+    dur: '42 min',
+    file: '#',
+  },
+  {
+    n: 'EP 02',
+    title: 'Rio: quem manda na cidade?',
+    desc: 'Milícias, orçamento público e a vida real em Nova Friburgo e na capital. Reportagem + análise.',
+    dur: '35 min',
+    file: '#',
+  },
+];
+
+const videos = [
+  {
+    genero: 'Vídeo',
+    title: 'Entrevista: para onde vai o pensamento à esquerda?',
+    meta: 'Estreia em breve • YouTube',
+    id: null as string | null,
+  },
+  {
+    genero: 'Vídeo',
+    title: 'Entrevista: o Rio que o cartão-postal esconde',
+    meta: 'Estreia em breve • YouTube',
+    id: null as string | null,
+  },
+];
+
+const emContinuo = [
+  { hora: '09h12', texto: 'Onde erramos? O debate que funda o Rio Mundo', link: '#selecao' },
+  { hora: '08h40', texto: 'EP 01 do podcast entra em produção: a esquerda depois do PT', link: '#podcasts' },
+  { hora: 'Ontem', texto: 'Nova entrevista em vídeo: o Rio que o cartão-postal esconde', link: '#entrevistas' },
+  { hora: '13 out', texto: 'Post fixado no X: siga e participe da conversa', link: 'https://x.com/rionomundo' },
+];
+---
+
+<Base>
+  <!-- A SELEÇÃO -->
+  <section id="selecao" class="mx-auto max-w-6xl px-6 py-12">
+    <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
+      <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Nossa opinião</h2>
+      <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
+      <a href="#" class="shrink-0 text-sm font-bold uppercase tracking-widest text-verde-700 hover:underline">Ver arquivo →</a>
+    </div>
+    <div class="mt-8 grid gap-x-8 gap-y-10 md:grid-cols-3">
+      {selecao.map((c) => (
+        <article class="group flex flex-col border-t-2 border-verde-950/80 pt-4">
+          {c.imagem && (<img src={c.imagem} alt="" loading="lazy" class="mb-4 aspect-[16/10] w-full border border-verde-950/15 object-cover" />)}
+          <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{c.genero}</p>
+          <h3 class="font-display mt-2 text-2xl font-semibold leading-tight"><a href={c.href} class="group-hover:underline group-hover:decoration-verde-700 group-hover:underline-offset-4">{c.title}</a></h3>
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-verde-950/65">{c.excerpt}</p>
+          <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/55">
+            <span class="font-bold uppercase tracking-widest text-verde-950/70">{c.editoria}</span>
+            <span class="mx-1">•</span> {c.author} <span class="mx-1">•</span> {c.date} <span class="mx-1">•</span> {c.readTime}
+          </p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- MAIS LIDAS -->
+  <section id="mais-lidas" class="border-y border-verde-950/15 bg-marfim-50">
+    <div class="mx-auto max-w-6xl px-6 py-12">
+      <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
+        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Em voga</h2>
+      </div>
+      <ol class="mt-2 grid gap-8 md:grid-cols-3">
+        {maisLidas.map((o, i) => (
+          <li class="flex gap-5 border-b border-verde-950/10 py-6 md:border-b-0">
+            <span class="font-display text-6xl font-semibold leading-none text-verde-700">{i + 1}</span>
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{o.meta}</p>
+              <h3 class="font-display mt-2 text-xl font-semibold leading-snug hover:underline hover:decoration-verde-700 hover:underline-offset-4">{o.title}</h3>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- PODCASTS -->
+  <section id="podcasts" class="mx-auto max-w-6xl px-6 py-12">
+    <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
+      <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Podcasts</h2>
+      <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
+      <span class="shrink-0 text-xs font-bold uppercase tracking-[0.2em] text-verde-950/55">Ouça offline • MP3 para baixar</span>
+    </div>
+    <div class="mt-8 grid gap-8 md:grid-cols-2">
+      {podcasts.map((p) => (
+        <article class="border border-verde-950/15 bg-marfim-50 p-7">
+          <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em]">
+            <span class="text-verde-700">Podcast • {p.n}</span>
+            <span class="text-verde-950/55">{p.dur} • MP3</span>
+          </div>
+          <h3 class="font-display mt-3 text-2xl font-semibold leading-tight">{p.title}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-verde-950/65">{p.desc}</p>
+          <audio controls preload="none" class="mt-5 w-full">
+            <source src={p.file} type="audio/mpeg" />
+            Seu navegador não suporta áudio.
+          </audio>
+          <div class="mt-4 flex flex-wrap items-center gap-4 border-t border-verde-950/10 pt-4">
+            <a href={p.file} download class="bg-verde-950 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-marfim-100 hover:bg-verde-900">⬇ Baixar MP3</a>
+            <span class="text-xs text-verde-950/55">Publique em <code class="bg-verde-950/5 px-1.5 py-0.5">public/audio/</code> e troque o campo <code class="bg-verde-950/5 px-1.5 py-0.5">file</code></span>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- VÍDEOS -->
+  <section id="entrevistas" class="border-y border-verde-950/15 bg-marfim-50">
+    <div class="mx-auto max-w-6xl px-6 py-12">
+      <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
+        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Entrevistas</h2>
+        <span class="hidden h-px flex-1 bg-verde-950/15 md:block"></span>
+        <span class="shrink-0 text-xs font-bold uppercase tracking-[0.2em] text-verde-950/55">Conversas longas</span>
+      </div>
+      <div class="mt-8 grid gap-8 md:grid-cols-2">
+        {videos.map((v) => (
+          <article class="border border-verde-950/15 bg-marfim-100">
+            <div class="grid aspect-video place-items-center bg-verde-950 text-marfim-100">
+              {v.id ? (
+                <iframe
+                  class="h-full w-full"
+                  src={`https://www.youtube.com/embed/${v.id}`}
+                  title={v.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                />
+              ) : (
+                <div class="px-8 text-center">
+                  <p class="font-display text-5xl text-verde-300">▶</p>
+                  <p class="mt-3 text-xs font-bold uppercase tracking-[0.2em] text-marfim-200/70">Cole o ID do YouTube no código para publicar</p>
+                </div>
+              )}
+            </div>
+            <div class="border-t-2 border-verde-950/80 p-6">
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{v.genero}</p>
+              <h3 class="font-display mt-2 text-xl font-semibold leading-snug">{v.title}</h3>
+              <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-verde-950/55">{v.meta}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- EM CONTÍNUO + NEWSLETTER -->
+  <section id="em-continuo" class="mx-auto max-w-6xl px-6 py-12">
+    <div class="grid gap-12 md:grid-cols-[1fr_1fr]">
+      <div>
+        <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
+          <h2 class="font-display text-3xl font-semibold tracking-tight">Últimas atualizações</h2>
+        </div>
+        <ul class="mt-2">
+          {emContinuo.map((e) => (
+            <li class="flex gap-4 border-b border-verde-950/10 py-4">
+              <span class="flex flex-col items-center">
+                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-verde-700"></span>
+                <span class="w-px flex-1 bg-verde-950/10"></span>
+              </span>
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-700">{e.hora}</p>
+                <a href={e.link} class="font-display mt-1 block text-lg font-medium leading-snug hover:underline hover:decoration-verde-700 hover:underline-offset-4">{e.texto}</a>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mt-5 inline-block text-sm font-bold uppercase tracking-widest text-verde-700 underline underline-offset-4 hover:text-verde-800">
+          Toda a atualidade no X →
+        </a>
+      </div>
+
+      <div id="newsletter" class="flex flex-col justify-center bg-verde-950 p-10 text-center text-marfim-100">
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-verde-300">Newsletter</p>
+        <h2 class="font-display mt-3 text-3xl font-semibold leading-tight md:text-4xl">O essencial do Rio Mundo, de segunda a sexta às 8h</h2>
+        <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-marfim-200/75">Cada dia, os textos do Rio Mundo que você não pode perder. Direto do Rio para o mundo.</p>
+        <form class="mx-auto mt-6 flex w-full max-w-md flex-col gap-3 sm:flex-row" onsubmit="return false">
+          <input required type="email" placeholder="seu@email.com" class="flex-1 border border-white/20 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-marfim-200/50 outline-none focus:border-verde-300" />
+          <button class="bg-marfim-100 px-6 py-3 text-xs font-bold uppercase tracking-widest text-verde-950 hover:bg-white">Assinar</button>
+        </form>
+        <p class="mt-4 text-[11px] text-marfim-200/55">Zero spam. Cancele quando quiser.</p>
+      </div>
+    </div>
+  </section>
+</Base>

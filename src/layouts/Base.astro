@@ -1,0 +1,130 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'Rio Mundo — Notícias sobre o Rio e o mundo',
+  description = 'Notícias sobre o Rio e o mundo pela ótica de uma esquerda não identitária.'
+} = Astro.props;
+import '../styles/global.css';
+
+const editorias = [
+  ['Nossa opinião', '#selecao'],
+  ['Podcasts', '#podcasts'],
+  ['Entrevistas', '#entrevistas'],
+  ['Em voga', '#mais-lidas'],
+  ['Últimas atualizações', '#em-continuo'],
+];
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen antialiased">
+    <!-- Masthead -->
+    <div class="bg-verde-700">
+      <div class="relative mx-auto max-w-6xl px-6 pb-6 pt-8 text-center">
+        <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" aria-label="Rio Mundo no X"
+          class="absolute right-6 top-6 grid h-11 w-11 place-items-center rounded-full bg-verde-950 text-white transition hover:bg-verde-900">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+        </a>
+        <a href="/" class="inline-block" aria-label="Rio Mundo — início">
+          <span class="inline-block rounded-2xl bg-marfim-100 px-8 py-4">
+            <img src="/logo.png" alt="Rio Mundo" class="mx-auto h-20 w-auto md:h-24" />
+          </span>
+        </a>
+        <div class="mx-auto mt-5 flex max-w-2xl items-center gap-4">
+          <span class="h-px flex-1 bg-verde-950/30"></span>
+          <p class="text-xs font-bold uppercase tracking-[0.25em] text-verde-950">
+            Uma nova visão do Brasil
+          </p>
+          <span class="h-px flex-1 bg-verde-950/30"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegação de editorias (filete duplo de jornal) -->
+    <nav class="border-t border-white/10 bg-verde-900">
+      <div class="no-scrollbar mx-auto flex max-w-6xl items-center justify-start gap-7 overflow-x-auto px-6 py-3 text-[13px] font-bold uppercase tracking-wider md:justify-center">
+        {editorias.map(([label, href]) => (
+          <a href={href} class="whitespace-nowrap text-marfim-200/85 underline-offset-4 hover:text-white hover:underline">{label}</a>
+        ))}
+      </div>
+    </nav>
+
+    <!-- Ticker "Últimas atualizações" -->
+    <div class="bg-verde-950 text-marfim-100">
+      <div class="mx-auto flex max-w-6xl items-center gap-4 px-6 py-2 text-xs">
+        <span class="flex shrink-0 items-center gap-2 font-bold uppercase tracking-[0.2em] text-verde-300">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-verde-500 opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-verde-500"></span>
+          </span>
+          Últimas atualizações
+        </span>
+        <div class="no-scrollbar flex gap-6 overflow-x-auto whitespace-nowrap text-marfim-200/85">
+          <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="hover:text-white"><strong class="text-marfim-100">09h12</strong> — Onde erramos? O debate que funda o Rio Mundo</a>
+          <a href="#podcasts" class="hover:text-white"><strong class="text-marfim-100">EP 01</strong> — A esquerda depois do PT, no ar em breve</a>
+          <a href="#entrevistas" class="hover:text-white"><strong class="text-marfim-100">Vídeo</strong> — O Rio que o cartão-postal esconde</a>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <slot />
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="mt-20 bg-verde-950 text-marfim-100">
+      <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.2fr_1fr_1fr_1fr]">
+        <div>
+          <img src="/logo-branca.png" alt="Rio Mundo" class="h-14 w-auto" />
+          <p class="mt-4 max-w-sm text-sm leading-relaxed text-marfim-200/75">
+            Notícias sobre o Rio e o mundo pela ótica de uma esquerda não identitária.
+            A opinião dos produtores não reflete necessariamente a posição oficial da Rio Mundo.
+          </p>
+          <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mt-4 inline-block text-sm font-bold uppercase tracking-widest text-verde-300 hover:text-white">@rionomundo no X →</a>
+        </div>
+        <div class="text-sm">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-verde-300">Seções</p>
+          <ul class="mt-4 space-y-2.5 text-marfim-200/85">
+            <li><a href="#selecao" class="hover:text-white hover:underline">Nossa opinião</a></li>
+            <li><a href="#mais-lidas" class="hover:text-white hover:underline">Em voga</a></li>
+            <li><a href="#podcasts" class="hover:text-white hover:underline">Podcasts</a></li>
+            <li><a href="#entrevistas" class="hover:text-white hover:underline">Entrevistas</a></li>
+          </ul>
+        </div>
+        <div class="text-sm">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-verde-300">O projeto</p>
+          <ul class="mt-4 space-y-2.5 text-marfim-200/85">
+            <li><a href="#em-continuo" class="hover:text-white hover:underline">Últimas atualizações</a></li>
+            <li><a href="#newsletter" class="hover:text-white hover:underline">Newsletter</a></li>
+          </ul>
+        </div>
+        <div class="text-sm">
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-verde-300">Acompanhe</p>
+          <ul class="mt-4 space-y-2.5 text-marfim-200/85">
+            <li><a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="hover:text-white hover:underline">X / Twitter</a></li>
+            <li><span>RSS dos podcasts (em breve)</span></li>
+            <li><span>Rio de Janeiro, Brasil</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/10">
+        <div class="mx-auto flex max-w-6xl flex-col justify-between gap-2 px-6 py-5 text-xs text-marfim-200/55 md:flex-row">
+          <span>© 2026 Rio Mundo. Todos os direitos reservados.</span>
+          <span>Onde erraram? Quais os rumos do pensamento à esquerda no Brasil?</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
