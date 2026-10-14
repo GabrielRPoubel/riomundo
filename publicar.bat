@@ -53,7 +53,7 @@ echo Nenhuma alteracao para registrar.
 goto PUSH
 
 :COMMIT
-for /f "delims=" %%D in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd HH:mm"') do set QUANDO=%%D
+for /f "delims=" %%D in ('powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd HH:mm'"') do set QUANDO=%%D
 git commit -m "Publicar site - !QUANDO! - !NOVOS! arquivo novo" >nul
 echo Commit criado.
 goto PUSH
@@ -70,12 +70,12 @@ goto FIM_OK
 
 :AVISO_MP3
 echo.
-echo AVISO - MP3 novo em public\audio. O player ainda precisa ser ligado no site. Me avise!
+echo AVISO - MP3 novo em public\audio. O player ainda precisa ser ligado no site. Me avise.
 goto FIM_OK
 
 :FIM_OK
 echo.
-echo Pronto! Site publicado.
+echo Pronto - site publicado.
 pause
 exit /b 0
 
