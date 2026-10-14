@@ -10,7 +10,7 @@ const selecao = (await getCollection('colunas'))
   .filter(visivel)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .map((entry) => ({
-    href: url(`coluna/${entry.slug}`),
+    href: url(entry.slug),
     imagem: entry.data.imagem,
     genero: entry.data.genero,
     title: entry.data.title,

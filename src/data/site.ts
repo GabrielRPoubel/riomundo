@@ -11,6 +11,12 @@ const base = import.meta.env.BASE_URL; // '/' local e no domínio; '/riomundo/' 
 export function url(caminho: string): string {
   return base + caminho.replace(/^\//, '');
 }
+// Onde o site está acessível AGORA: domínio próprio ou prévia no Pages.
+export const HOST_ATUAL = base === '/' ? SITE_URL : 'https://gabrielrpoubel.github.io';
+// URL completa e curta de um artigo — usada no compartilhar e nas metatags.
+export function paginaUrl(slug: string): string {
+  return HOST_ATUAL + url(slug);
+}
 
 export const editorias: Array<[string, string]> = [
   ['Nossa opinião', url('#selecao')],

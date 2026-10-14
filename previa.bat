@@ -50,8 +50,8 @@ start "Previa Rio Mundo - feche esta janela para parar" /d "%CD%" "%NPM%" run de
 echo Aguardando o servidor...
 timeout /t 8 /nobreak >nul
 if defined SLUG (
-  echo Abrindo http://localhost:4321/coluna/!SLUG!
-  start http://localhost:4321/coluna/!SLUG!
+  echo Abrindo http://localhost:4321/!SLUG!
+  start http://localhost:4321/!SLUG!
 ) else (
   echo Abrindo http://localhost:4321
   start http://localhost:4321

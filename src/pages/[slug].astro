@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import { tempoLeitura, formatarData, visivel, url, SITE_URL } from '../../data/site';
+import Base from '../layouts/Base.astro';
+import { tempoLeitura, formatarData, visivel, url, paginaUrl } from '../data/site';
 
 export async function getStaticPaths() {
   const colunas = (await getCollection('colunas')).filter(visivel);
@@ -22,10 +22,10 @@ const mesmos = todos.filter((e) => e.slug !== entry.slug && e.data.editoria === 
 const outros = todos.filter((e) => e.slug !== entry.slug && e.data.editoria !== entry.data.editoria);
 const leiaTambem = [...mesmos, ...outros].slice(0, 2);
 
-// Compartilhar sem JS: links de intenção do X e do WhatsApp.
-const paginaUrl = `${SITE_URL}/coluna/${entry.slug}`;
-const shareX = `https://x.com/intent/post?text=${encodeURIComponent(entry.data.title)}&url=${encodeURIComponent(paginaUrl)}`;
-const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} — ${paginaUrl}`)}`;
+// Compartilhar sem JS: links de intenção do X e do WhatsApp (URL curta e viva).
+const pagina = paginaUrl(entry.slug);
+const shareX = `https://x.com/intent/post?text=${encodeURIComponent(entry.data.title)}&url=${encodeURIComponent(pagina)}`;
+const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} — ${pagina}`)}`;
 ---
 
 <Base title={`${entry.data.title} — Rio Mundo`} description={entry.data.excerpt} image={entry.data.imagem ?? '/logo-polido.png'} type="article" pubDate={entry.data.pubDate.toISOString()}>
@@ -63,7 +63,7 @@ const shareZap = `https://wa.me/?text=${encodeURIComponent(`${entry.data.title} 
           {leiaTambem.map((r) => (
             <li class="border-t border-verde-950/15 pt-3">
               <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{r.data.genero}</p>
-              <a href={url(`coluna/${r.slug}`)} class="font-display mt-1 block text-lg font-semibold leading-snug hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{r.data.title}</a>
+              <a href={url(r.slug)} class="font-display mt-1 block text-lg font-semibold leading-snug hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{r.data.title}</a>
             </li>
           ))}
         </ul>

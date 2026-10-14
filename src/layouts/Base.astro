@@ -17,7 +17,7 @@ const {
 } = Astro.props;
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
-import { editorias, visivel, url } from '../data/site';
+import { editorias, visivel, url, HOST_ATUAL, SITE_URL } from '../data/site';
 
 // Ticker deriva dos 3 artigos mais recentes — nunca dessincroniza da capa.
 const tickerPosts = (await getCollection('colunas'))
@@ -25,9 +25,9 @@ const tickerPosts = (await getCollection('colunas'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
 
-const site = Astro.site?.toString().replace(/\/$/, '') ?? '';
-const canonicalUrl = canonical ?? (site ? `${site}${Astro.url.pathname}` : Astro.url.pathname);
-const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : image;
+const canonicalUrl = canonical ?? HOST_ATUAL + Astro.url.pathname;
+const ogImage = image.startsWith('http') ? image : HOST_ATUAL + url(image);
+const isLogo = image === '/logo-polido.png';
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -49,6 +49,9 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    {isLogo && (<meta property="og:image:width" content="3292" />)}
+    {isLogo && (<meta property="og:image:height" content="1938" />)}
+    {type === 'article' && pubDate && (<meta property="article:published_time" content={pubDate} />)}
     <meta name="theme-color" content="#052E16" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -63,7 +66,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
       inLanguage: 'pt-BR',
       ...(pubDate ? { datePublished: pubDate, dateModified: pubDate } : {}),
       author: { '@type': 'Organization', name: 'Rio Mundo' },
-      publisher: { '@type': 'Organization', name: 'Rio Mundo', url: site || 'https://x.com/rionomundo' },
+      publisher: { '@type': 'Organization', name: 'Rio Mundo', url: SITE_URL },
     })} />
   </head>
   <body class="min-h-screen antialiased">
@@ -109,7 +112,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
         </span>
         <div class="no-scrollbar flex min-w-0 flex-1 gap-8 overflow-x-auto whitespace-nowrap text-marfim-200/85 [mask-image:linear-gradient(to_right,black_85%,transparent_100%)]">
           {tickerPosts.map((t) => (
-            <a href={url(`coluna/${t.slug}`)} class="shrink-0 hover:text-white focus-visible:outline-2 focus-visible:outline-verde-300"><strong class="font-semibold text-marfim-100">{t.data.genero}</strong> <span class="text-marfim-200/60">—</span> {t.data.title}</a>
+            <a href={url(t.slug)} class="shrink-0 hover:text-white focus-visible:outline-2 focus-visible:outline-verde-300"><strong class="font-semibold text-marfim-100">{t.data.genero}</strong> <span class="text-marfim-200/60">—</span> {t.data.title}</a>
           ))}
         </div>
       </div>

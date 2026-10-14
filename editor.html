@@ -71,6 +71,11 @@
   #preview figure { margin: 1.5rem 0 0; }
   #preview figcaption { font-size: 12px; opacity: .65; margin-top: 4px; }
   #preview hr { margin: 2rem 0; border: 0; border-top: 1px solid rgb(5 46 22 / .15); }
+  .rev-lista { list-style: none; margin: 10px 0 0; padding: 0; }
+  .rev-lista li { border: 1px solid rgb(5 46 22 / .2); background: #fff;
+    padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .rev-ctx { color: rgb(5 46 22 / .75); margin: 5px 0 8px; line-height: 1.6; }
+  .rev-ctx mark { background: #f6d7db; color: inherit; padding: 0 2px; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
   .btn { border: 0; padding: 12px 22px; font-size: 13px; font-weight: 700;
     text-transform: uppercase; letter-spacing: .1em; cursor: pointer; }
@@ -80,6 +85,19 @@
   #status { margin-top: 12px; font-size: 14px; }
   #status.ok { color: var(--verde-900); font-weight: 700; }
   #status.err { color: #b00020; font-weight: 700; }
+  .info { display: inline-grid; place-items: center; width: 20px; height: 20px;
+    border-radius: 50%; border: 1.5px solid var(--verde-900); color: var(--verde-900);
+    background: transparent; font-size: 12px; font-weight: 800; font-style: normal;
+    cursor: pointer; vertical-align: 1px; margin-left: 6px; padding: 0; line-height: 1; }
+  .info:hover { background: var(--verde-100); }
+  .info[aria-expanded="true"] { background: var(--verde-950); border-color: var(--verde-950); color: var(--marfim); }
+  .pop { border: 1px solid rgb(5 46 22 / .25); background: #fff; padding: 12px 14px;
+    font-size: 13px; line-height: 1.65; margin-top: 8px; }
+  .pop strong { display: block; margin-bottom: 4px; }
+  .pop ul { margin: 4px 0 0; padding-left: 18px; }
+  .aviso { display: block; font-size: 13px; font-weight: 700; margin: 8px 0 0;
+    padding: 8px 11px; border: 1px dashed #8a5a00; background: #fdf6e7; color: #7a4e00; }
+  .aviso.ok { border-color: var(--verde-900); background: var(--verde-100); color: var(--verde-900); }
   details { margin-top: 14px; }
   summary { cursor: pointer; font-size: 13px; font-weight: 700; }
   pre { background: var(--verde-950); color: #d8f3e2; padding: 14px;
@@ -149,11 +167,22 @@
       </div>
       <label for="resumo">Resumo (aparece no card da homepage)</label>
       <input id="resumo" placeholder="Uma ou duas frases que resumem o texto" />
-      <label for="capa">Imagem de capa (opcional — aparece no card e no topo do artigo)</label>
+      <label for="capa">Imagem de capa (opcional — aparece no card e no topo do artigo)<button type="button" class="info" id="info-capa" aria-expanded="false" aria-controls="pop-capa" title="Como deve ser a capa?">i</button></label>
+      <div class="pop" id="pop-capa" hidden>
+        <strong>Capa ideal</strong>
+        <ul>
+          <li><strong>1600 × 1000 px</strong> (cobre card, artigo e preview do WhatsApp)</li>
+          <li><strong>JPG qualidade ~80</strong> para foto; <strong>PNG</strong> só p/ gráfico com texto</li>
+          <li><strong>Até 300 KB</strong> (ideal &lt; 200 KB) — se passar, comprima no Squoosh/TinyPNG</li>
+          <li>Assunto no <strong>centro com margem</strong> — as bordas são cortadas</li>
+          <li>Evite SVG/GIF de capa: o WhatsApp não gera preview</li>
+        </ul>
+      </div>
       <div class="row" style="grid-template-columns: 1fr auto; align-items: end;">
         <input id="capa" placeholder="/imagens/foto.png ou https://…" />
         <button class="btn btn-sec" id="enviar-capa" type="button">Enviar arquivo…</button>
       </div>
+      <p class="aviso" id="aviso-capa" hidden></p>
     </section>
 
     <section class="card">
@@ -176,8 +205,13 @@
       <button data-fmt="hr" title="Linha divisória">— Linha</button>
       <button data-fmt="img" title="Inserir imagem">Imagem</button>
     </div>
-    <textarea id="corpo" placeholder="Escreva aqui. Use os botões acima para formatar."></textarea>
+    <textarea id="corpo" spellcheck="true" lang="pt-BR" placeholder="Escreva aqui. Use os botões acima para formatar."></textarea>
     <div class="actions">
+      <button class="btn btn-sec" id="revisar" type="button">Revisar texto</button>
+    </div>
+    <div id="revisao"></div>
+    <div class="actions">
+      <button class="btn btn-sec" id="abrir">Abrir…</button>
       <button class="btn btn-pub" id="publicar">Publicar no site</button>
       <button class="btn btn-sec" id="baixar">Baixar .md</button>
       <button class="btn btn-sec" id="limpar">Limpar</button>
@@ -353,6 +387,43 @@ function mdParaHtml(md) {
 function escYaml(s) {  if (/[:#\[\]{}&*!|>'"%@`,?]|^\s|\s$|\n/.test(s)) return '"' + s.replace(/"/g, '\\"') + '"';
   return s;
 }
+// Lê um campo do frontmatter (espelho do escYaml: desfaz as aspas).
+function lerCampo(fm, campo) {
+  const m = fm.match(new RegExp('^' + campo + ':\\s*(?:"((?:[^"\\\\]|\\\\.)*)"|(.*))\\s*$', 'm'));
+  if (!m) return '';
+  if (m[1] !== undefined) return m[1].replace(/\\"/g, '"');
+  return (m[2] || '').trim();
+}
+function selecionarSeValido(id, valor) {
+  const sel = $(id);
+  if (!sel.options) return !!valor;
+  const vals = Array.from(sel.options).map((o) => o.value || o.text);
+  if (vals.includes(valor)) { sel.value = valor; return true; }
+  return false;
+}
+// Devolve um .md para os campos — para continuar um rascunho.
+function carregarMd(nomeArquivo, md) {
+  const m = md.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!m) { status('Esse arquivo não parece um artigo (.md do editor).', 'err'); return false; }
+  const fm = m[1];
+  $('titulo').value = lerCampo(fm, 'title');
+  $('slug').value = nomeArquivo.replace(/\.md$/i, '');
+  slugTouched = true;
+  $('resumo').value = lerCampo(fm, 'excerpt');
+  $('autor').value = lerCampo(fm, 'author') || 'Redação Rio Mundo';
+  const data = lerCampo(fm, 'pubDate');
+  if (/^\d{4}-\d{2}-\d{2}/.test(data)) $('data').value = data.slice(0, 10);
+  const avisos = [];
+  if (!selecionarSeValido('genero', lerCampo(fm, 'genero'))) avisos.push('gênero "' + lerCampo(fm, 'genero') + '" fora do padrão');
+  if (!selecionarSeValido('editoria', lerCampo(fm, 'editoria'))) avisos.push('editoria "' + lerCampo(fm, 'editoria') + '" fora do padrão');
+  $('capa').value = lerCampo(fm, 'imagem');
+  capaInfo = null;
+  corpo.value = m[2].replace(/\s+$/, '');
+  atualizar();
+  status('Aberto: ' + nomeArquivo + '. Confira e continue editando.'
+    + (avisos.length ? ' Atenção: ' + avisos.join('; ') + '.' : ''), avisos.length ? 'err' : 'ok');
+  return true;
+}
 // Estimativa de leitura: ~900 letras por minuto, mínimo de 1 min.
 function calcularTempo() {
   const letras = (corpo.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || []).length;
@@ -380,6 +451,49 @@ function formatarDataBr(iso) {
   const p = iso.split('-');
   return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
 }
+// Lembra do último arquivo enviado para conferir peso (só vale p/ o caminho sugerido).
+let capaInfo = null;
+function validarCapa() {
+  const el = $('aviso-capa');
+  const v = $('capa').value.trim();
+  const mostrar = (msg, ok) => {
+    el.hidden = false;
+    el.textContent = msg;
+    el.className = 'aviso' + (ok ? ' ok' : '');
+  };
+  if (!v) { el.hidden = true; return; }
+  const ext = (v.match(/\.([a-z0-9]+)(\?|#|$)/i) || [])[1] || '';
+  const foto = /^(jpe?g|png)$/i.test(ext);
+  if (!foto) {
+    mostrar('Capa em .' + (ext || '?') + ' — prefira .jpg (foto) ou .png (gráfico). O WhatsApp pode não gerar preview de outros formatos.');
+    return;
+  }
+  if (capaInfo && capaInfo.destino === v) {
+    if (capaInfo.kb > 300) mostrar('Capa com ' + capaInfo.kb + ' KB — acima de 300 KB. Comprima no Squoosh/TinyPNG antes de publicar.');
+    else mostrar('Capa com ' + capaInfo.kb + ' KB — dentro do ideal.', true);
+    return;
+  }
+  el.hidden = true;
+}
+$('info-capa').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const pop = $('pop-capa');
+  const aberto = pop.hidden;
+  pop.hidden = !aberto;
+  $('info-capa').setAttribute('aria-expanded', String(aberto));
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest || !e.target.closest('#pop-capa')) {
+    $('pop-capa').hidden = true;
+    $('info-capa').setAttribute('aria-expanded', 'false');
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    $('pop-capa').hidden = true;
+    $('info-capa').setAttribute('aria-expanded', 'false');
+  }
+});
 function atualizar() {
   const titulo = $('titulo').value.trim();
   const tmp = calcularTempo();
@@ -402,8 +516,9 @@ function atualizar() {
   if (capa !== '#') prev += '<figure class="pv-fig"><img src="' + escAttr(capa) + '" alt="" /></figure>';
   const corpoHtml = mdParaHtml(corpo.value);
   $('preview').innerHTML = prev + (corpoHtml || '<p class="pv-vazio">O texto aparece aqui…</p>');
+  validarCapa();
 }
-['titulo', 'resumo', 'autor', 'data', 'genero', 'editoria'].forEach((id) => {
+['titulo', 'resumo', 'autor', 'data', 'genero', 'editoria', 'capa'].forEach((id) => {
   $(id).addEventListener('input', atualizar);
 });
 corpo.addEventListener('input', atualizar);
@@ -418,6 +533,167 @@ function validar() {
   if (!corpo.value.trim()) { status('Escreva o texto do artigo antes de publicar.', 'err'); return false; }
   return true;
 }
+// Revisor: usa a API pública do LanguageTool (grátis, pt-BR).
+// O texto é enviado ao serviço — só use em textos destinados a publicar.
+let revMatches = [];
+// Tira a marcação trocando por espaços (mesmo tamanho) — o corretor
+// entende o texto e as posições continuam valendo no original.
+function textoParaRevisao(texto) {
+  return texto
+    .replace(/^#{1,6}(?= )/gm, (m) => ' '.repeat(m.length))
+    .replace(/^> /gm, '  ')
+    .replace(/^---$/gm, '   ')
+    .replace(/!\[|\]\(.*?\)/g, (m) => ' '.repeat(m.length))
+    .replace(/(?<!!)\[|\]\(.*?\)/g, (m) => ' '.repeat(m.length))
+    .replace(/(?<=\S)\*|\*(?=\S)/g, ' ')
+    .replace(/__/g, '  ');
+}
+// Checagens locais de pontuação e markdown — offline, precisas,
+// com posições exatas no texto original.
+function checagemLocal(texto) {
+  const achados = [];
+  const ctxLinha = (linha, i, tam) => {
+    const ini = Math.max(0, i - 40);
+    const fim = Math.min(linha.length, i + tam + 40);
+    return { text: (ini > 0 ? '…' : '') + linha.slice(ini, fim) + (fim < linha.length ? '…' : ''),
+      offset: i - ini + (ini > 0 ? 1 : 0), length: tam };
+  };
+  const add = (curta, longa, offset, tam, linha, i, troca) => {
+    achados.push({ shortMessage: curta, message: longa, offset, length: tam,
+      context: ctxLinha(linha, i, tam),
+      replacements: troca === undefined ? [] : [{ value: troca }] });
+  };
+  const linhas = texto.split('\n');
+  let base = 0;
+  for (const linha of linhas) {
+    const corpo = linha.replace(/[ \t]+$/, ''); // fim de linha com espaço duplo é quebra válida
+    let m;
+    const re2 = / {2,}/g;
+    while ((m = re2.exec(corpo))) {
+      if (m.index > 0) add('Espaço duplo', 'Há dois espaços seguidos aqui.', base + m.index, m[0].length, linha, m.index, ' ');
+    }
+    const re3 = / ([,.;:!?%])(?![)\]])/g;
+    while ((m = re3.exec(linha))) add('Espaço antes da pontuação', 'Em português não há espaço antes de "' + m[1] + '".', base + m.index, 2, linha, m.index, m[1]);
+    const re4 = /,(?=[A-Za-zÀ-ÖØ-öø-ÿ])/g;
+    while ((m = re4.exec(linha))) add('Falta espaço depois da vírgula', 'Depois da vírgula vai um espaço.', base + m.index, 1, linha, m.index, ', ');
+    const re5 = /(?<!\d)([;:])(?=[A-Za-zÀ-ÖØ-öø-ÿ0-9])/g;
+    while ((m = re5.exec(linha))) add('Falta espaço depois de "' + m[1] + '"', 'Depois de "' + m[1] + '" vai um espaço.', base + m.index, 1, linha, m.index, m[1] + ' ');
+    const re6 = /(?<!\.)\.\.\.(?!\.)/g;
+    while ((m = re6.exec(linha))) add('Reticências', 'Use … em vez de ...', base + m.index, 3, linha, m.index, '…');
+    const re7 = /(?<!\.)\.\.(?!\.)/g;
+    while ((m = re7.exec(linha))) add('Ponto duplo', 'Há dois pontos seguidos aqui.', base + m.index, 2, linha, m.index, '.');
+    const re8 = /([!?])[?!]+/g;
+    while ((m = re8.exec(linha))) add('Pontuação repetida', 'Um "' + m[1] + '" só já basta.', base + m.index, m[0].length, linha, m.index, m[1]);
+    base += linha.length + 1;
+  }
+  const ctxTexto = (i, tam) => {
+    const iniL = texto.lastIndexOf('\n', i - 1) + 1;
+    let fimL = texto.indexOf('\n', i);
+    if (fimL === -1) fimL = texto.length;
+    const linha = texto.slice(iniL, fimL);
+    return ctxLinha(linha, i - iniL, tam);
+  };
+  if (((texto.match(/\*\*/g) || []).length % 2) === 1) {
+    const i = texto.lastIndexOf('**');
+    achados.push({ shortMessage: 'Negrito sem fechar', message: 'Há um ** sem par — abra ou feche o negrito.',
+      offset: i, length: 2, context: ctxTexto(i, 2), replacements: [] });
+  }
+  const semDuplo = texto.replace(/\*\*/g, '  ').replace(/^\s*[*+-] /gm, (x) => ' '.repeat(x.length));
+  if (((semDuplo.match(/\*/g) || []).length % 2) === 1) {
+    const i = semDuplo.lastIndexOf('*');
+    achados.push({ shortMessage: 'Itálico sem fechar', message: 'Há um * sem par — abra ou feche o itálico.',
+      offset: i, length: 1, context: ctxTexto(i, 1), replacements: [] });
+  }
+  return achados;
+}
+function revisaoHtml(matches) {
+  if (!matches.length) return '<p class="hint">Nenhum problema encontrado. Bom texto!</p>';
+  let html = '<p class="hint"><strong>' + matches.length + ' ponto(s):</strong> clique na sugestão para aplicar.</p><ul class="rev-lista">';
+  matches.slice(0, 20).forEach((m, i) => {
+    const ctx = m.context || { text: '', offset: 0, length: 0 };
+    html += '<li><div>' + escHtml(m.shortMessage || m.message || 'Sugestão') + '</div>'
+      + '<div class="rev-ctx">' + escHtml(ctx.text.slice(0, ctx.offset))
+      + '<mark>' + escHtml(ctx.text.slice(ctx.offset, ctx.offset + ctx.length)) + '</mark>'
+      + escHtml(ctx.text.slice(ctx.offset + ctx.length)) + '</div><div>'
+      + (m.replacements || []).slice(0, 3).map((r) =>
+        '<button class="mini" data-rev="' + i + '" data-troca="' + escAttr(r.value) + '">'
+        + escHtml(r.value) + '</button>').join(' ') + '</div></li>';
+  });
+  return html + '</ul>';
+}
+function mostrarRevisao(matches) {
+  revMatches = matches;
+  $('revisao').innerHTML = revisaoHtml(matches);
+}
+function aplicarRevisao(i, troca) {
+  const m = revMatches[i];
+  if (!m) return;
+  corpo.value = corpo.value.slice(0, m.offset) + troca + corpo.value.slice(m.offset + m.length);
+  revMatches.splice(i, 1);
+  const delta = troca.length - m.length;
+  revMatches.forEach((x) => { if (x.offset > m.offset) x.offset += delta; });
+  atualizar();
+  mostrarRevisao(revMatches);
+}
+async function revisarTexto(btn) {
+  const texto = corpo.value;
+  if (!texto.trim()) { status('Escreva o texto antes de revisar.', 'err'); return; }
+  if (texto.length > 15000) { status('Texto muito longo para a revisão gratuita (limite ~15 mil caracteres).', 'err'); return; }
+  btn.disabled = true;
+  const locais = checagemLocal(texto);
+  $('revisao').innerHTML = '<p class="hint">Revisando pontuação aqui + gramática no LanguageTool…</p>';
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 25000);
+    const resp = await fetch('https://api.languagetool.org/v2/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'text=' + encodeURIComponent(textoParaRevisao(texto)) + '&language=pt-BR',
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!resp.ok) throw new Error('http ' + resp.status);
+    const dados = await resp.json();
+    mostrarRevisao([...locais, ...(dados.matches || [])]);
+    status('');
+  } catch (err) {
+    mostrarRevisao(locais);
+    status(locais.length
+      ? 'LanguageTool indisponível — valendo só a revisão local de pontuação.'
+      : 'Sem internet e nada local a apontar.', locais.length ? 'ok' : 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+$('revisar').addEventListener('click', (e) => revisarTexto(e.target));
+$('revisao').addEventListener('click', (e) => {
+  const b = e.target.closest ? e.target.closest('button[data-rev]') : null;
+  if (b) aplicarRevisao(+b.dataset.rev, b.dataset.troca);
+});
+function abrirLegado() {
+  const pick = document.createElement('input');
+  pick.type = 'file';
+  pick.accept = '.md,text/markdown';
+  pick.onchange = async () => {
+    const arq = pick.files && pick.files[0];
+    if (arq) carregarMd(arq.name, await arq.text());
+  };
+  pick.click();
+}
+$('abrir').addEventListener('click', async () => {
+  try {
+    if (!window.showOpenFilePicker) throw new Error('no-fs-api');
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'Artigo Markdown', accept: { 'text/markdown': ['.md'] } }],
+      multiple: false,
+    });
+    const arq = await handle.getFile();
+    carregarMd(arq.name, await arq.text());
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    abrirLegado();
+  }
+});
 $('publicar').addEventListener('click', async () => {
   if (!validar()) return;
   const { slug, md } = gerarMd();
@@ -457,7 +733,10 @@ $('enviar-capa').addEventListener('click', async () => {
   const arquivo = await escolherArquivoImagem();
   if (!arquivo) return;
   const destino = await salvarNaPasta(arquivo, 'imagens');
-  if (destino) $('capa').value = destino;
+  if (destino) {
+    $('capa').value = destino;
+    capaInfo = { destino, kb: Math.round(arquivo.size / 1024) };
+  }
   atualizar();
 });
 atualizar();
