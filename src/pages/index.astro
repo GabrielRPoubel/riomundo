@@ -1,10 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
+import { tempoLeitura, formatarData, visivel } from '../data/site';
 
 // Cards de "Nossa opinião" vêm dos arquivos src/content/colunas/*.md
 // (criados pelo editor.html). Os mais recentes aparecem primeiro.
+// Suspenso em suspensos.json não aparece (gerir.html).
 const selecao = (await getCollection('colunas'))
+  .filter(visivel)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .map((entry) => ({
     href: `/coluna/${entry.slug}`,
@@ -14,14 +17,15 @@ const selecao = (await getCollection('colunas'))
     excerpt: entry.data.excerpt,
     editoria: entry.data.editoria,
     author: entry.data.author,
-    date: entry.data.pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }),
-    readTime: entry.data.readTime,
+    date: formatarData(entry.data.pubDate),
+    readTime: tempoLeitura(entry.body),
   }));
 
 const [destaque, ...restante] = selecao;
 
 // "Em voga" e "Últimas atualizações" derivam dos artigos reais — sem posts falsos.
-const emVoga = selecao.slice(0, 3);
+// "Em voga" pula o destaque para a capa não repetir o mesmo texto 3 vezes.
+const emVoga = (selecao.length > 1 ? selecao.slice(1, 4) : selecao.slice(0, 3));
 const ultimas = selecao.slice(0, 4);
 ---
 
@@ -33,7 +37,7 @@ const ultimas = selecao.slice(0, 4);
     <div class="flex items-baseline gap-4 border-b-2 border-verde-950 pb-3">
       <h2 id="titulo-selecao" class="font-display shrink-0 text-3xl font-semibold tracking-tight md:text-4xl">Nossa opinião</h2>
       <span class="hidden h-px flex-1 bg-verde-950/15 md:block" aria-hidden="true"></span>
-      <span class="hidden shrink-0 text-xs font-bold uppercase tracking-widest text-verde-950/55 sm:block">{selecao.length} texto{selecao.length === 1 ? '' : 's'}</span>
+      <span class="hidden shrink-0 text-xs font-bold uppercase tracking-widest text-verde-950/70 sm:block">{selecao.length} texto{selecao.length === 1 ? '' : 's'}</span>
     </div>
 
     {destaque && (
@@ -47,8 +51,8 @@ const ultimas = selecao.slice(0, 4);
             <h3 class="font-display mt-2 text-4xl font-semibold leading-[1.02] tracking-tight md:text-5xl">
               <a href={destaque.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{destaque.title}</a>
             </h3>
-            <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-verde-950/65">{destaque.excerpt}</p>
-            <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/60">
+            <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-verde-950/75">{destaque.excerpt}</p>
+            <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/75">
               <span class="font-bold uppercase tracking-widest text-verde-950/70">{destaque.editoria}</span>
               <span class="mx-1" aria-hidden="true">•</span> {destaque.author} <span class="mx-1" aria-hidden="true">•</span> {destaque.date} <span class="mx-1" aria-hidden="true">•</span> {destaque.readTime}
             </p>
@@ -63,8 +67,8 @@ const ultimas = selecao.slice(0, 4);
           <h3 class="font-display mt-3 text-4xl font-semibold leading-[1.02] tracking-tight text-verde-950 md:text-[3.25rem]">
             <a href={destaque.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{destaque.title}</a>
           </h3>
-          <p class="mt-4 max-w-2xl text-base leading-relaxed text-verde-950/65 md:text-lg">{destaque.excerpt}</p>
-          <p class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-verde-950/10 pt-4 text-xs text-verde-950/60">
+          <p class="mt-4 max-w-2xl text-base leading-relaxed text-verde-950/75 md:text-lg">{destaque.excerpt}</p>
+          <p class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-verde-950/10 pt-4 text-xs text-verde-950/75">
             <span class="font-bold uppercase tracking-widest text-verde-950/70">{destaque.editoria}</span>
             <span aria-hidden="true">•</span> <span>{destaque.author}</span>
             <span aria-hidden="true">•</span> <span>{destaque.date}</span>
@@ -78,11 +82,11 @@ const ultimas = selecao.slice(0, 4);
     <div class="mt-8 grid gap-x-8 gap-y-10 md:grid-cols-3">
       {restante.map((c) => (
         <article class="group flex flex-col border-t-2 border-verde-950/80 pt-4">
-          {c.imagem && (<img src={c.imagem} alt={c.title} loading="lazy" decoding="async" class="mb-4 aspect-[16/10] w-full border border-verde-950/15 object-cover" />)}
+          {c.imagem && (<img src={c.imagem} alt="" loading="lazy" decoding="async" class="mb-4 aspect-[16/10] w-full border border-verde-950/15 object-cover" />)}
           <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{c.genero}</p>
           <h3 class="font-display mt-2 text-2xl font-semibold leading-tight"><a href={c.href} class="group-hover:underline group-hover:decoration-verde-800 group-hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{c.title}</a></h3>
           <p class="mt-3 flex-1 text-sm leading-relaxed text-verde-950/75">{c.excerpt}</p>
-          <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/60">
+          <p class="mt-4 border-t border-verde-950/10 pt-3 text-xs text-verde-950/75">
             <span class="font-bold uppercase tracking-widest text-verde-950/70">{c.editoria}</span>
             <span class="mx-1" aria-hidden="true">•</span> {c.author} <span class="mx-1" aria-hidden="true">•</span> {c.date} <span class="mx-1" aria-hidden="true">•</span> {c.readTime}
           </p>
@@ -102,7 +106,7 @@ const ultimas = selecao.slice(0, 4);
           <li class="flex gap-5 border-b border-verde-950/10 py-6 md:border-b-0">
             <span class="font-display text-6xl font-semibold leading-none text-verde-800" aria-hidden="true">{i + 1}</span>
             <div>
-              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{o.editoria}</p>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-verde-900">{o.genero}</p>
               <h3 class="font-display mt-2 text-xl font-semibold leading-snug"><a href={o.href} class="hover:underline hover:decoration-verde-800 hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-verde-900">{o.title}</a></h3>
             </div>
           </li>
@@ -191,7 +195,7 @@ const ultimas = selecao.slice(0, 4);
         <h2 class="font-display mt-3 text-3xl font-semibold leading-tight md:text-4xl">O essencial no seu e-mail</h2>
         <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-marfim-200/75">Ainda estamos montando. Por enquanto, lê por aqui e acompanha no X.</p>
         <a href="https://x.com/rionomundo" target="_blank" rel="noreferrer" class="mx-auto mt-6 inline-block min-h-[44px] bg-marfim-100 px-6 py-3 text-xs font-bold uppercase tracking-widest text-verde-950 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Acompanhar no X →</a>
-        <p class="mt-4 text-[11px] text-marfim-200/55">Sem pressa, sem spam.</p>
+        <p class="mt-4 text-[11px] text-marfim-200/70">Sem pressa, sem spam.</p>
       </div>
     </div>
   </section>

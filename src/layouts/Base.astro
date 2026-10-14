@@ -16,7 +16,14 @@ const {
   pubDate,
 } = Astro.props;
 import '../styles/global.css';
-import { editorias, ticker } from '../data/site';
+import { getCollection } from 'astro:content';
+import { editorias, visivel } from '../data/site';
+
+// Ticker deriva dos 3 artigos mais recentes — nunca dessincroniza da capa.
+const tickerPosts = (await getCollection('colunas'))
+  .filter(visivel)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
 
 const site = Astro.site?.toString().replace(/\/$/, '') ?? '';
 const canonicalUrl = canonical ?? (site ? `${site}${Astro.url.pathname}` : Astro.url.pathname);
@@ -31,7 +38,6 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/logo-polido.png" />
     <meta property="og:site_name" content="Rio Mundo" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -46,6 +52,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
     <meta name="theme-color" content="#052E16" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800;900&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Franklin:wght@600;700;800;900&display=swap" rel="stylesheet" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
@@ -54,7 +61,8 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
       description,
       image: [ogImage],
       inLanguage: 'pt-BR',
-      ...(pubDate ? { datePublished: pubDate } : {}),
+      ...(pubDate ? { datePublished: pubDate, dateModified: pubDate } : {}),
+      author: { '@type': 'Organization', name: 'Rio Mundo' },
       publisher: { '@type': 'Organization', name: 'Rio Mundo', url: site || 'https://x.com/rionomundo' },
     })} />
   </head>
@@ -64,7 +72,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
     <div class="bg-verde-950">
       <div class="mx-auto max-w-6xl px-6 py-4 text-center md:py-5">
         <a href="/" class="inline-block" aria-label="Rio Mundo — início">
-          <img src="/logo-polido.png" alt="Rio Mundo — Uma nova visão do Brasil" width="360" height="200" class="mx-auto h-14 w-auto brightness-0 invert md:h-16" decoding="async" fetchpriority="high" />
+          <img src="/logo-branca.png" alt="Rio Mundo — Uma nova visão do Brasil" width="720" height="423" class="mx-auto h-14 w-auto md:h-16" decoding="async" fetchpriority="high" />
         </a>
         <div class="mx-auto mt-3 flex max-w-xl items-center gap-3">
           <span class="h-px flex-1 bg-white/20" aria-hidden="true"></span>
@@ -78,7 +86,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
 
     <!-- Navegação de editorias (filete duplo de jornal) -->
     <nav aria-label="Seções" class="sticky top-0 z-50 border-t border-white/10 bg-verde-900">
-      <div class="no-scrollbar mx-auto flex max-w-6xl items-center justify-start gap-6 overflow-x-auto px-6 py-2.5 text-[13px] font-bold uppercase tracking-wider md:justify-center md:gap-7">
+      <div class="no-scrollbar mx-auto flex max-w-6xl items-center justify-start gap-6 overflow-x-auto px-6 py-2.5 text-[13px] font-bold uppercase tracking-wider max-md:[mask-image:linear-gradient(to_right,black_88%,transparent_100%)] md:justify-center md:gap-7">
         {editorias.map(([label, href]) => (
           <a href={href} class="whitespace-nowrap text-marfim-200/85 underline-offset-4 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{label}</a>
         ))}
@@ -94,14 +102,14 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
       <div class="mx-auto flex max-w-6xl items-center gap-4 px-6 py-2 text-xs">
         <span class="flex shrink-0 items-center gap-2 font-bold uppercase tracking-[0.18em] text-verde-300">
           <span class="relative flex h-2 w-2" aria-hidden="true">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-verde-500 opacity-75 motion-reduce:animate-none"></span>
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-verde-500 opacity-75 motion-reduce:animate-none [animation-iteration-count:5]"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-verde-500"></span>
           </span>
           Últimas atualizações
         </span>
         <div class="no-scrollbar flex min-w-0 flex-1 gap-8 overflow-x-auto whitespace-nowrap text-marfim-200/85 [mask-image:linear-gradient(to_right,black_85%,transparent_100%)]">
-          {ticker.map((t) => (
-            <a href={t.href} class="shrink-0 hover:text-white focus-visible:outline-2 focus-visible:outline-verde-300"><strong class="font-semibold text-marfim-100">{t.destaque}</strong> <span class="text-marfim-200/60">—</span> {t.texto}</a>
+          {tickerPosts.map((t) => (
+            <a href={`/coluna/${t.slug}`} class="shrink-0 hover:text-white focus-visible:outline-2 focus-visible:outline-verde-300"><strong class="font-semibold text-marfim-100">{t.data.genero}</strong> <span class="text-marfim-200/60">—</span> {t.data.title}</a>
           ))}
         </div>
       </div>
@@ -115,7 +123,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
     <footer class="mt-20 bg-verde-950 text-marfim-100">
       <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-10 text-center md:flex-row md:justify-between md:text-left">
         <a href="/" aria-label="Rio Mundo — início" class="inline-block shrink-0">
-          <img src="/logo-polido.png" alt="Rio Mundo" width="180" height="100" class="h-12 w-auto brightness-0 invert" loading="lazy" decoding="async" />
+          <img src="/logo-branca.png" alt="Rio Mundo" width="360" height="212" class="h-12 w-auto" loading="lazy" decoding="async" />
         </a>
         <nav aria-label="Rodapé" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-bold uppercase tracking-widest">
           <a href="/#selecao" class="text-marfim-200/85 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-verde-300">Nossa opinião</a>
@@ -125,7 +133,7 @@ const ogImage = image.startsWith('http') ? image : site ? `${site}${image}` : im
         </nav>
       </div>
       <div class="border-t border-white/10">
-        <div class="mx-auto flex max-w-6xl flex-col justify-between gap-1 px-6 py-4 text-xs text-marfim-200/55 md:flex-row">
+        <div class="mx-auto flex max-w-6xl flex-col justify-between gap-1 px-6 py-4 text-xs text-marfim-200/70 md:flex-row">
           <span>© 2026 Rio Mundo. Todos os direitos reservados.</span>
           <span>Rio de Janeiro, Brasil</span>
         </div>

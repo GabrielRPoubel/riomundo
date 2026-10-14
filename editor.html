@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Editor Rio Mundo — escrever e publicar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Libre+Franklin:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet" />
 <style>
   :root {
     --marfim: #FAF6ED; --marfim2: #FDFBF6; --verde-950: #052E16;
@@ -37,17 +40,37 @@
     border: 1px dashed rgb(5 46 22 / .35); background: var(--verde-100); }
   #corpo { min-height: 320px; font-family: ui-monospace, Consolas, monospace;
     line-height: 1.6; }
-  #preview { min-height: 320px; }
-  #preview h2 { font-family: Georgia, serif; }
+  #preview { min-height: 320px; font-family: "Inter", system-ui, sans-serif; font-size: 17px; }
+  /* Prévia fiel à página do artigo: mesma estrutura e mesmos estilos do site */
+  .pv-voltar { font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .2em; color: var(--verde-900); margin: 0 0 20px; }
+  .pv-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .25em; color: var(--verde-900); margin: 0; }
+  .pv-h1 { font-family: "Libre Franklin", "Inter", system-ui, sans-serif;
+    font-size: 36px; font-weight: 600; line-height: 1.05;
+    letter-spacing: -.02em; margin: 14px 0 0; color: var(--verde-950); }
+  .pv-excerpt { font-size: 18px; line-height: 1.6; color: rgb(5 46 22 / .75);
+    border-bottom: 2px solid var(--verde-950); padding-bottom: 18px; margin: 14px 0 0; }
+  .pv-byline { font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .18em; color: rgb(5 46 22 / .75); margin: 14px 0 0; }
+  .pv-fig { margin: 22px 0 0; }
+  .pv-fig img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+    border: 1px solid rgb(5 46 22 / .15); display: block; }
+  .pv-vazio { opacity: .5; }
+  #preview h2 { font-family: "Libre Franklin", "Inter", system-ui, sans-serif;
+    font-size: 26px; font-weight: 600; margin: 2rem 0 .75rem; letter-spacing: -.01em; }
+  #preview h3 { font-family: "Libre Franklin", "Inter", system-ui, sans-serif;
+    font-size: 21px; font-weight: 600; margin: 1.75rem 0 .5rem; }
   #preview blockquote { border-left: 3px solid var(--verde-700);
-    margin: 12px 0; padding-left: 12px; font-style: italic;
-    font-family: Georgia, serif; font-size: 18px; }
-  #preview ul, #preview ol { padding-left: 22px; line-height: 1.7; }
-  #preview p { line-height: 1.75; }
-  #preview a { color: var(--verde-700); }
-  #preview img { max-width: 100%; border: 1px solid rgb(5 46 22 / .2); }
-  #preview figure { margin: 12px 0; }
+    margin: 1.5rem 0; padding-left: 1rem; font-style: italic;
+    font-family: "Libre Franklin", "Inter", system-ui, sans-serif; font-size: 20px; }
+  #preview ul, #preview ol { padding-left: 22px; line-height: 1.7; margin: 1rem 0; }
+  #preview p { line-height: 1.7; color: rgb(5 46 22 / .85); margin: 1rem 0; }
+  #preview a { color: var(--verde-900); text-decoration: underline; text-underline-offset: 3px; }
+  #preview img { width: 100%; border: 1px solid rgb(5 46 22 / .2); display: block; }
+  #preview figure { margin: 1.5rem 0 0; }
   #preview figcaption { font-size: 12px; opacity: .65; margin-top: 4px; }
+  #preview hr { margin: 2rem 0; border: 0; border-top: 1px solid rgb(5 46 22 / .15); }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
   .btn { border: 0; padding: 12px 22px; font-size: 13px; font-weight: 700;
     text-transform: uppercase; letter-spacing: .1em; cursor: pointer; }
@@ -66,7 +89,7 @@
 </head>
 <body>
 <header>
-  <img src="public/logo-polido.png" alt="Rio Mundo" style="height: 40px; width: auto; filter: brightness(0) invert(1);" />
+  <img src="public/logo-branca.png" alt="Rio Mundo" style="height: 40px; width: auto;" />
   <div>
     <h1>Editor Rio Mundo</h1>
     <p>Escrever → formatar → publicar em “Nossa opinião”</p>
@@ -76,7 +99,9 @@
 <main>
   <p class="hint"><strong>Como publicar:</strong> 1) preencha os campos e escreva o texto;
   2) clique <strong>Publicar no site</strong> e salve o arquivo dentro da pasta
-  <code>Para publicar\Textos</code>; 3) rode o <code>publicar.bat</code> (pasta principal)
+  <code>Para publicar\Textos</code>; 2b) para ver o artigo renderizado no site
+  antes de publicar, rode o <code>previa.bat</code> (pasta principal);
+  3) rode o <code>publicar.bat</code> (pasta principal)
   para gerar o site com o artigo novo (card na homepage + página do artigo).
   Imagens vão para <code>Para publicar\Imagens</code>; escreva a legenda na linha de baixo em
   <em>itálico</em>.</p>
@@ -132,8 +157,8 @@
     </section>
 
     <section class="card">
-      <h2>2. Prévia</h2>
-      <div id="preview"><p style="opacity:.5">A prévia do texto aparece aqui…</p></div>
+      <h2>2. Prévia — como fica no site</h2>
+      <div id="preview"><p class="pv-vazio">A prévia do texto aparece aqui…</p></div>
     </section>
   </div>
 
@@ -287,7 +312,7 @@ function urlSegura(u) {
 }
 function inline(s) {
   return escHtml(s)
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt, src) => '<img src="' + escAttr(urlSegura(src)) + '" alt="' + alt + '" loading="lazy" />')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt, src) => '<img src="' + escAttr(urlSegura(src)) + '" alt="' + escAttr(alt) + '" loading="lazy" />')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/\[(.+?)\]\((.+?)\)/g, (m, txt, href) => '<a href="' + escAttr(urlSegura(href)) + '" rel="noreferrer">' + txt + '</a>');
@@ -350,16 +375,33 @@ function gerarMd() {
   linhas.push('---', '', corpo.value.trim() + '\n');
   return { slug, md: linhas.join('\n') };
 }
+function formatarDataBr(iso) {
+  if (!iso) return '';
+  const p = iso.split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+}
 function atualizar() {
   const titulo = $('titulo').value.trim();
   const tmp = calcularTempo();
   $('tempo').textContent = '≈ ' + tmp.texto + ' · ' + tmp.detalhe;
   const { md } = gerarMd();
   $('raw').textContent = md;
-  const titleHtml = titulo
-    ? '<h2 style="font-family:Georgia,serif">' + escHtml(titulo) + '</h2>' : '';
-  $('preview').innerHTML = titleHtml + mdParaHtml(corpo.value) ||
-    '<p style="opacity:.5">A prévia do texto aparece aqui…</p>';
+  // Monta a prévia na mesma ordem da página do artigo: voltar, gênero,
+  // título, resumo, byline, capa e corpo.
+  const genero = $('genero').value;
+  const autor = $('autor').value.trim() || 'Redação Rio Mundo';
+  const data = formatarDataBr($('data').value);
+  const resumo = $('resumo').value.trim();
+  const capa = urlSegura($('capa').value.trim());
+  let prev = '<p class="pv-voltar">← Voltar</p>';
+  prev += '<p class="pv-kicker">' + escHtml(genero) + '</p>';
+  if (titulo) prev += '<h1 class="pv-h1">' + escHtml(titulo) + '</h1>';
+  if (resumo) prev += '<p class="pv-excerpt">' + escHtml(resumo) + '</p>';
+  prev += '<p class="pv-byline">Por ' + escHtml(autor) +
+    (data ? ' • ' + data : '') + ' • ' + tmp.texto + ' de leitura</p>';
+  if (capa !== '#') prev += '<figure class="pv-fig"><img src="' + escAttr(capa) + '" alt="" /></figure>';
+  const corpoHtml = mdParaHtml(corpo.value);
+  $('preview').innerHTML = prev + (corpoHtml || '<p class="pv-vazio">O texto aparece aqui…</p>');
 }
 ['titulo', 'resumo', 'autor', 'data', 'genero', 'editoria'].forEach((id) => {
   $(id).addEventListener('input', atualizar);

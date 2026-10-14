@@ -18,4 +18,6 @@ O publicar.bat move os arquivos para o lugar certo, IGNORA os
 repetidos sem alteração, confere se o site monta (build) e envia
 tudo ao GitHub. Se nada mudou, ele avisa e não faz nada.
 
-Quer só olhar antes? Duplo clique em visualizar.bat.
+Quer ver o artigo no site ANTES de publicar? Duplo clique em
+previa.bat (pasta principal). Ele mostra o rascunho renderizado
+sem publicar nada. Gostou? Rode o publicar.bat.

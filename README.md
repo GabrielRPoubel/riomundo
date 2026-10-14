@@ -18,7 +18,9 @@ Ref: https://x.com/rionomundo
 ## Publicar tudo (fluxo simples)
 1. Salve `.md` em `Para publicar\Textos\`, imagens em `Para publicar\Imagens\`, `.mp3` em `Para publicar\Audios\`
    (cada pasta tem um guia `.txt`)
-2. Duplo clique em `publicar.bat` — ele move só o que é novo, **ignora arquivos
+2. **Quer ver o artigo no site antes?** Duplo clique em `previa.bat` — abre o
+   artigo renderizado em http://localhost:4321 sem publicar nada.
+3. Duplo clique em `publicar.bat` — ele move só o que é novo, **ignora arquivos
    repetidos sem alteração**, confere o build, commita e envia ao GitHub.
    Se nada mudou, ele avisa e não faz nada.
 
@@ -36,6 +38,15 @@ Ref: https://x.com/rionomundo
 - Imagens: botão **Imagem** (URL ou solte o arquivo em `Para publicar\Imagens/`); campo **capa** para thumbnail do card (`/imagens/nome-do-arquivo`)
 - Legenda: escreva na linha abaixo da imagem em *itálico*
 
+## Gerir categorias, autores e suspensões
+1. Abra `gerir.html` no navegador (duplo clique, use Chrome ou Edge)
+2. Clique **Conectar pasta do projeto** e selecione a pasta principal
+3. No painel: **Transferir** move artigos entre editorias/gêneros/autores
+   (quando um valor zera, ele some — é assim que se apaga uma categoria);
+   **Suspender** esconde do site sem apagar (vale após rebuild)
+4. Na lista de artigos dá para trocar editoria/gênero/autor e apagar artigos
+5. Confira no `previa.bat` e publique com `publicar.bat`
+
 ## Publicar vídeo
 Em `src/data/site.ts`, troque `id: null` pelo ID do YouTube.
 
@@ -44,7 +55,9 @@ Em `src/data/site.ts`, troque `id: null` pelo ID do YouTube.
 (“Em voga” e “Últimas atualizações” derivam dos artigos reais em `src/content/colunas/`.)
 
 ## Visualizar antes do commit
-Duplo clique em `visualizar.bat` → abre http://localhost:4321 com o build final.
+- Rascunho ainda em `Para publicar\`: duplo clique em `previa.bat` → abre o
+  artigo renderizado em http://localhost:4321 sem publicar nada.
+- Site já publicado: duplo clique em `visualizar.bat` → abre o build final.
 
 ## Visual
 - Marfim: #FAF6ED / #FDFBF6 / #F1E9D7

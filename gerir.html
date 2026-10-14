@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gerir Rio Mundo — categorias, autores e suspensões</title>
+<style>
+  :root {
+    --marfim: #FAF6ED; --marfim2: #FDFBF6; --verde-950: #052E16;
+    --verde-900: #065F2C; --verde-700: #009C3B; --verde-100: #DCF2E3;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--marfim); color: var(--verde-950);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--verde-950); color: var(--marfim);
+    padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  header img { height: 40px; width: auto; }
+  header h1 { font-size: 18px; margin: 0; }
+  header p { margin: 0; font-size: 12px; opacity: .7; }
+  main { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+  .card { background: var(--marfim2); border: 1px solid rgb(5 46 22 / .15);
+    border-top: 3px solid var(--verde-950); padding: 18px; margin-top: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 20px; }
+  .card h3 { margin: 18px 0 8px; font-size: 15px; text-transform: uppercase;
+    letter-spacing: .1em; }
+  .hint { font-size: 13px; opacity: .75; line-height: 1.6; }
+  .btn { border: 0; padding: 12px 22px; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em; cursor: pointer;
+    background: var(--verde-950); color: var(--marfim); }
+  .btn:hover { background: var(--verde-900); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .mini { border: 1px solid rgb(5 46 22 / .3); background: #fff; color: inherit;
+    padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+    margin: 1px 2px; white-space: nowrap; }
+  .mini:hover { background: var(--verde-100); }
+  .mini.perigo:hover { background: #f6d7db; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid rgb(5 46 22 / .12);
+    vertical-align: middle; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; opacity: .7; }
+  .num { text-align: center; width: 64px; }
+  .selo { display: inline-block; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px;
+    border: 1px solid rgb(5 46 22 / .3); }
+  .selo.off { background: var(--verde-950); color: var(--marfim); }
+  .selo.aviso { background: #f6d7db; border-color: #b00020; color: #b00020; }
+  select, input[type="text"] { padding: 5px 7px; font-size: 13px;
+    border: 1px solid rgb(5 46 22 / .25); background: #fff; color: inherit;
+    max-width: 100%; }
+  #status { margin-top: 12px; font-size: 14px; min-height: 20px; }
+  #status.ok { color: var(--verde-900); font-weight: 700; }
+  #status.err { color: #b00020; font-weight: 700; }
+  .wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header>
+  <img src="public/logo-branca.png" alt="Rio Mundo" />
+  <div>
+    <h1>Gerir Rio Mundo</h1>
+    <p>Categorias, autores, suspensões e artigos</p>
+  </div>
+</header>
+
+<main>
+  <p class="hint"><strong>O que dá para fazer:</strong> renomear autores, transferir
+  artigos entre editorias e gêneros, <strong>suspender</strong> (esconde do site sem
+  apagar) e apagar artigos. Depois confira no <code>previa.bat</code> e publique com
+  o <code>publicar.bat</code> — suspensão só vale depois do rebuild.</p>
+
+  <section class="card">
+    <h2>1. Conectar</h2>
+    <button class="btn" id="conectar">Conectar pasta do projeto</button>
+    <span id="pasta" class="hint"></span>
+    <p class="hint">Use Chrome ou Edge. Selecione a pasta principal do projeto
+    (a que contém o <code>editor.html</code>). Nada muda sozinho: cada ação pede confirmação.</p>
+  </section>
+
+  <section class="card">
+    <h2>2. Painel — editorias, gêneros e autores</h2>
+    <div id="painel"><p class="hint">Conecte a pasta primeiro.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Artigos</h2>
+    <div id="artigos" class="wrap"><p class="hint">Conecte a pasta primeiro.</p></div>
+  </section>
+
+  <p id="status"></p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// Valores aceitos pelo site (iguais ao content.config.ts e ao editor.html).
+const EDITORIAS = ['Rio', 'Brasil', 'Mundo', 'Ideias & Debates'];
+const GENEROS = ['Notícia', 'Opinião', 'Extras'];
+const AUTOR_PADRAO = 'Redação Rio Mundo';
+
+let dirColunas = null;   // src/content/colunas
+let dirRascunhos = null; // Para publicar/Textos (opcional)
+let arqSuspensos = null; // src/data/suspensos.json
+let arquivos = [];       // { nome, onde: 'site'|'rasc', handle, campos }
+let suspensos = { editorias: [], generos: [], autores: [] };
+
+function status(msg, cls) {
+  const el = $('status');
+  el.textContent = msg;
+  el.className = cls || '';
+}
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escAttr(s) {
+  return escHtml(s).replace(/"/g, '&quot;');
+}
+// Aspas no YAML só quando necessário (igual ao editor.html).
+function escYaml(s) {
+  s = String(s);
+  if (/[:#\[\]{}&*!|>'"%@`,?]|^\s|\s$|\n/.test(s)) return '"' + s.replace(/"/g, '\\"') + '"';
+  return s;
+}
+// Lê os 4 campos do frontmatter sem tocar no resto do arquivo.
+function lerCampos(texto) {
+  const m = texto.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const get = (campo) => {
+    if (!m) return '';
+    const l = m[1].match(new RegExp('^' + campo + ':\\s*(?:"([^"]*)"|(.*))\\s*$', 'm'));
+    if (!l) return '';
+    return l[1] !== undefined ? l[1] : (l[2] || '').trim();
+  };
+  return { title: get('title'), editoria: get('editoria'), genero: get('genero'), author: get('author') };
+}
+// Troca (ou cria) um campo do frontmatter preservando o resto byte a byte.
+// Usa função no replace para "$" no valor não quebrar.
+function gravarCampo(texto, campo, valor) {
+  const linha = campo + ': ' + escYaml(valor);
+  const re = new RegExp('^' + campo + ':.*$', 'm');
+  if (re.test(texto)) return texto.replace(re, () => linha);
+  return texto.replace(/^---\r?\n/, () => '---\n' + linha + '\n');
+}
+async function lerArquivo(handle) {
+  const f = await handle.getFile();
+  return await f.text();
+}
+async function salvarArquivo(handle, texto) {
+  const w = await handle.createWritable();
+  await w.write(texto);
+  await w.close();
+}
+// Valor efetivo: autor ausente vale o padrão do schema.
+function efetivo(a, campo) {
+  if (campo === 'author') return a.campos.author || AUTOR_PADRAO;
+  return a.campos[campo] || '';
+}
+
+async function subpasta(raiz, caminho) {
+  let d = raiz;
+  for (const parte of caminho) d = await d.getDirectoryHandle(parte);
+  return d;
+}
+async function listarMd(dir, onde) {
+  const lista = [];
+  if (!dir) return lista;
+  for await (const [nome, handle] of dir.entries()) {
+    if (handle.kind === 'file' && /\.md$/i.test(nome)) {
+      const texto = await lerArquivo(handle);
+      lista.push({ nome, onde, handle, texto, campos: lerCampos(texto) });
+    }
+  }
+  return lista;
+}
+
+$('conectar').addEventListener('click', async () => {
+  if (!window.showDirectoryPicker) {
+    status('Este navegador não abre pastas. Use Chrome ou Edge.', 'err');
+    return;
+  }
+  try {
+    const raiz = await window.showDirectoryPicker({ mode: 'readwrite' });
+    dirColunas = await subpasta(raiz, ['src', 'content', 'colunas']);
+    try { dirRascunhos = await subpasta(raiz, ['Para publicar', 'Textos']); }
+    catch (e) { dirRascunhos = null; }
+    try {
+      const dirData = await subpasta(raiz, ['src', 'data']);
+      arqSuspensos = await dirData.getFileHandle('suspensos.json', { create: true });
+    } catch (e) { arqSuspensos = null; }
+    $('pasta').textContent = 'Conectado: ' + raiz.name;
+    await recarregar();
+    status('Pasta conectada. Escolha uma ação abaixo.', 'ok');
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    status('Não consegui abrir a pasta. Selecione a pasta principal do projeto.', 'err');
+  }
+});
+
+async function recarregar() {
+  arquivos = (await listarMd(dirColunas, 'site'))
+    .concat(await listarMd(dirRascunhos, 'rasc'));
+  arquivos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  if (arqSuspensos) {
+    try {
+      const txt = await lerArquivo(arqSuspensos);
+      const obj = JSON.parse(txt || '{}');
+      suspensos = {
+        editorias: obj.editorias || [],
+        generos: obj.generos || [],
+        autores: obj.autores || [],
+      };
+    } catch (e) { suspensos = { editorias: [], generos: [], autores: [] }; }
+  }
+  desenharPainel();
+  desenharArtigos();
+}
+
+function contagem(campo) {
+  // Junta valores do padrão + valores achados nos arquivos (pega erro de digitação).
+  const base = campo === 'editoria' ? EDITORIAS : campo === 'genero' ? GENEROS : [];
+  const mapa = new Map();
+  for (const v of base) mapa.set(v, { site: 0, rasc: 0 });
+  for (const a of arquivos) {
+    const v = efetivo(a, campo);
+    if (!mapa.has(v)) mapa.set(v, { site: 0, rasc: 0 });
+    if (v) mapa.get(v)[a.onde === 'site' ? 'site' : 'rasc']++;
+  }
+  return mapa;
+}
+function noPadrao(campo, valor) {
+  if (campo === 'editoria') return EDITORIAS.includes(valor);
+  if (campo === 'genero') return GENEROS.includes(valor);
+  return true;
+}
+function suspenso(campo, valor) {
+  const lista = campo === 'editoria' ? suspensos.editorias
+    : campo === 'genero' ? suspensos.generos : suspensos.autores;
+  return lista.includes(valor);
+}
+
+function linhaTabela(campo, titulo, valor, c) {
+  const total = c.site + c.rasc;
+  const off = suspenso(campo, valor);
+  const fora = valor !== '' && !noPadrao(campo, valor);
+  const selo = off ? ' <span class="selo off">suspenso</span>'
+    : fora ? ' <span class="selo aviso">fora do padrão</span>' : '';
+  return '<tr><td>' + escHtml(valor === '' ? '(sem valor)' : valor) + selo + '</td>'
+    + '<td class="num">' + c.site + '</td><td class="num">' + c.rasc + '</td>'
+    + '<td><button class="mini" data-acao="transferir" data-campo="' + campo
+    + '" data-valor="' + escAttr(valor) + '">Transferir…</button>'
+    + '<button class="mini" data-acao="alternar" data-campo="' + campo
+    + '" data-valor="' + escAttr(valor) + '">' + (off ? 'Reativar' : 'Suspender') + '</button></td></tr>';
+}
+function tabelaPainel(campo, titulo) {
+  const mapa = contagem(campo);
+  let html = '<h3>' + titulo + '</h3><div class="wrap"><table>'
+    + '<tr><th>Valor</th><th>No ar</th><th>Rascunhos</th><th>Ações</th></tr>';
+  for (const [valor, c] of mapa) html += linhaTabela(campo, titulo, valor, c);
+  return html + '</table></div>';
+}
+function desenharPainel() {
+  $('painel').innerHTML = tabelaPainel('editoria', 'Editorias')
+    + tabelaPainel('genero', 'Gêneros') + tabelaPainel('author', 'Autores')
+    + '<p class="hint">Transferir move todos os artigos do valor para outro. '
+    + 'Quando um valor fica com zero artigos, ele some da lista. '
+    + 'Suspender esconde do site sem apagar (vale após rebuild).</p>';
+}
+
+function opcoes(valores, atual) {
+  return valores.map((v) => '<option value="' + escAttr(v) + '"'
+    + (v === atual ? ' selected' : '') + '>' + escHtml(v) + '</option>').join('');
+}
+function desenharArtigos() {
+  if (!arquivos.length) {
+    $('artigos').innerHTML = '<p class="hint">Nenhum artigo encontrado.</p>';
+    return;
+  }
+  let html = '<table><tr><th>Arquivo</th><th>Título</th><th>Editoria</th>'
+    + '<th>Gênero</th><th>Autor</th><th></th></tr>';
+  for (const a of arquivos) {
+    const i = arquivos.indexOf(a);
+    const eds = [...new Set([...EDITORIAS, a.campos.editoria].filter(Boolean))];
+    const gens = [...new Set([...GENEROS, a.campos.genero].filter(Boolean))];
+    html += '<tr><td>' + escHtml(a.nome)
+      + (a.onde === 'rasc' ? ' <span class="selo">rascunho</span>' : '') + '</td>'
+      + '<td>' + escHtml(a.campos.title || '—') + '</td>'
+      + '<td><select data-i="' + i + '" data-campo="editoria">' + opcoes(eds, a.campos.editoria) + '</select></td>'
+      + '<td><select data-i="' + i + '" data-campo="genero">' + opcoes(gens, a.campos.genero) + '</select></td>'
+      + '<td><input type="text" data-i="' + i + '" data-campo="author" value="'
+      + escAttr(a.campos.author || '') + '" placeholder="' + escAttr(AUTOR_PADRAO) + '" /></td>'
+      + '<td><button class="mini perigo" data-acao="apagar" data-i="' + i + '">Apagar</button></td></tr>';
+  }
+  $('artigos').innerHTML = html + '</table>'
+    + '<p class="hint">Mudou aqui, salvou na hora. Autor vazio vale “' + escHtml(AUTOR_PADRAO) + '”.</p>';
+}
+
+async function salvarSuspensos() {
+  if (!arqSuspensos) { status('Arquivo de suspensões não encontrado.', 'err'); return false; }
+  await salvarArquivo(arqSuspensos, JSON.stringify(suspensos, null, 2) + '\n');
+  return true;
+}
+async function transferir(campo, de) {
+  let para = '';
+  if (campo === 'author') {
+    para = prompt('Transferir "' + de + '" para qual autor?', de);
+    if (para === null) return;
+    para = para.trim();
+    if (!para) { status('Nome vazio — nada mudou.', 'err'); return; }
+  } else {
+    const validos = campo === 'editoria' ? EDITORIAS : GENEROS;
+    para = prompt('Transferir "' + de + '" para qual valor?\nVálidos: ' + validos.join(' | '), validos[0]);
+    if (para === null) return;
+    para = para.trim();
+    if (!validos.includes(para)) {
+      status('Valor inválido. Válidos: ' + validos.join(' | '), 'err');
+      return;
+    }
+  }
+  if (para === de) { status('É o mesmo valor — nada mudou.', 'err'); return; }
+  let n = 0;
+  for (const a of arquivos) {
+    if (efetivo(a, campo) === de) {
+      a.texto = gravarCampo(a.texto, campo, para);
+      a.campos = lerCampos(a.texto);
+      await salvarArquivo(a.handle, a.texto);
+      n++;
+    }
+  }
+  await recarregar();
+  status(n + ' artigo(s) transferido(s) para "' + para + '". Confira no previa.bat.', 'ok');
+}
+async function alternar(campo, valor) {
+  const lista = campo === 'editoria' ? suspensos.editorias
+    : campo === 'genero' ? suspensos.generos : suspensos.autores;
+  const i = lista.indexOf(valor);
+  if (i >= 0) lista.splice(i, 1);
+  else lista.push(valor);
+  if (await salvarSuspensos()) {
+    desenharPainel();
+    status('"' + valor + '" ' + (i >= 0 ? 'reativado.' : 'suspenso. Rode previa.bat / publicar.bat para valer.') ,
+      'ok');
+  }
+}
+
+$('painel').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-acao]');
+  if (!b) return;
+  const { acao, campo, valor } = b.dataset;
+  if (acao === 'transferir') await transferir(campo, valor);
+  else if (acao === 'alternar') await alternar(campo, valor);
+});
+$('artigos').addEventListener('change', async (e) => {
+  const el = e.target;
+  if (el.tagName === 'SELECT') {
+    const a = arquivos[+el.dataset.i];
+    a.texto = gravarCampo(a.texto, el.dataset.campo, el.value);
+    a.campos = lerCampos(a.texto);
+    await salvarArquivo(a.handle, a.texto);
+    await recarregar();
+    status('Salvo: ' + a.nome + ' → ' + el.dataset.campo + ' = "' + el.value + '".', 'ok');
+  } else if (el.tagName === 'INPUT') {
+    const a = arquivos[+el.dataset.i];
+    a.texto = gravarCampo(a.texto, 'author', el.value.trim());
+    a.campos = lerCampos(a.texto);
+    await salvarArquivo(a.handle, a.texto);
+    await recarregar();
+    status('Salvo: ' + a.nome + ' → autor.', 'ok');
+  }
+});
+$('artigos').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-acao="apagar"]');
+  if (!b) return;
+  const a = arquivos[+b.dataset.i];
+  if (!confirm('Apagar "' + a.nome + '" (' + (a.onde === 'site' ? 'no ar' : 'rascunho') + ')? Não tem volta.')) return;
+  const dir = a.onde === 'site' ? dirColunas : dirRascunhos;
+  await dir.removeEntry(a.nome);
+  await recarregar();
+  status('Apagado: ' + a.nome, 'ok');
+});
+</script>
+</body>
+</html>
