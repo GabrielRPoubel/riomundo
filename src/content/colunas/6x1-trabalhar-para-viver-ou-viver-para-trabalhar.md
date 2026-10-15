@@ -2,7 +2,7 @@
 title: "6x1: Trabalhar para viver ou viver para trabalhar?"
 excerpt: "Chegadas as eleições, o fim da jornada de semi-escravidão volta à pauta na próxima semana."
 genero: Notícia
-editoria: Rio
+editoria: Brasil
 author: Redação Rio Mundo
 pubDate: 2026-10-14
 readTime: 4 min
