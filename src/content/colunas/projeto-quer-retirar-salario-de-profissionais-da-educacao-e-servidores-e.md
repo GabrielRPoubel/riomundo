@@ -2,7 +2,7 @@
 title: "Projeto quer retirar salário de profissionais da educação e servidores estaduais que assumirem cargos sindicais"
 excerpt: "O Governo de Mato Grosso do Sul enviou à Assembleia Legislativa um projeto de lei complementar que muda as regras da licença que garante o pagamento de salário para profissionais da educação e servidores públicos…"
 genero: Notícia
-editoria: Mundo
+editoria: Brasil
 author: "Redação Rio Mundo"
 pubDate: 2026-11-19
 readTime: 5 min
