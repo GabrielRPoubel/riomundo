@@ -1,6 +1,6 @@
 ---
 title: "Bebê de 9 meses sofre descarga elétrica ao colocar fio na boca e morre em MS"
-excerpt: "A morte do bebê de 9 meses foi confirmada pelo hospital á Polícia Civil."
+excerpt: "A morte do bebê de 9 meses foi confirmada pelo hospital à Polícia Civil."
 genero: Notícia
 editoria: Brasil
 author: "Redação Rio Mundo"
@@ -8,7 +8,7 @@ pubDate: 2026-11-19
 readTime: 1 min
 ---
 
-A morte do bebê de 9 meses foi confirmada pelo hospital á Polícia Civil.
+A morte do bebê de 9 meses foi confirmada pelo hospital à Polícia Civil.
 
 Um bebê de nove meses morreu após sofrer uma descarga elétrica ao colocar um fio na boca, na tarde de quarta-feira (19), em Água Clara, a 193 quilômetros de Campo Grande. A criança estava no chão da residência quando entrou em contato com o fio elétrico. Ela foi socorrida, mas não resistiu.
 
